@@ -62,15 +62,8 @@
 
             @if (sportsplan == null)
             {
-                <div class="text-center text-muted py-4">
-                    <div class="spinner-border"></div>
-                    <p class="mt-2 mb-0">load Trainingsplan…</p>
-                </div>
-            }
-            else if (!sportsplan.Trainingsplan.Any())
-            {
                 <div class="alert alert-info m-3 text-center">
-                    No trainingsplan found
+                    No trainingsplan found or active
                 </div>
             }
             else
