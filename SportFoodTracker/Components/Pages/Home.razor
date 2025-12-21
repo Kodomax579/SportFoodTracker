@@ -103,8 +103,8 @@
 </div>
 
 @code {
-    public SportsplanModel sportsplan;
-    public TrainingModel trainingModel;
+    public SportsplanModel? sportsplan;
+    public TrainingModel? trainingModel;
     public bool isTrainingDoneToday;
 
     protected override async Task OnInitializedAsync()
@@ -122,7 +122,7 @@
     {
         if (sportsplan == null || sportsplan.Trainingsplan == null)
         {
-            return null;
+            return null!;
         }
         var today = DateTime.Today.DayOfWeek;
         return sportsplan.Trainingsplan

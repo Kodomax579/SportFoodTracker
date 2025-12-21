@@ -18,7 +18,7 @@ namespace SportFoodTracker.Service
         public SportsplanService(SportsPlanDatabase sportsPlanDatabase)
         {
             _sportsPlanDatabase = sportsPlanDatabase;
-
+            activeSportsplan = new SportsplanModel();
             sportsplans = new List<SportsplanModel>();
         }
 
@@ -32,7 +32,7 @@ namespace SportFoodTracker.Service
         public async Task<SportsplanModel> GetActiveSportsplanAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
-            activeSportsplan = plans.FirstOrDefault(plan => plan.IsActive);
+            activeSportsplan = plans.FirstOrDefault(plan => plan.IsActive)!;
             return activeSportsplan;
         }
 

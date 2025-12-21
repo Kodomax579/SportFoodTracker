@@ -5,7 +5,7 @@ namespace SportFoodTracker.Context.Sportplan
 {
     public class SportsPlanDatabase
     {
-        private SQLiteAsyncConnection _database;
+        private SQLiteAsyncConnection? _database;
 
         /// <summary>
         /// Creates and initializes the database connection if it hasn't been created yet.
@@ -27,7 +27,10 @@ namespace SportFoodTracker.Context.Sportplan
         public async Task<List<SportsplanModel>> GetAllSportsplansAsync()
         {
             await Init();
-
+            if (_database == null)
+            {
+                return new List<SportsplanModel>();
+            }
             var sportsplans = await _database.Table<SportsplanModel>().ToListAsync();
 
             var trainings = await _database.Table<TrainingsplanModel>().ToListAsync();
@@ -59,6 +62,10 @@ namespace SportFoodTracker.Context.Sportplan
         {
             await Init();
 
+            if (_database == null)
+            {
+                return new List<TrainingsplanModel>();
+            }
             var trainings = await _database.Table<TrainingsplanModel>().ToListAsync();
             var exercises = await _database.Table<ExerciseModel>().ToListAsync();
 
@@ -76,6 +83,10 @@ namespace SportFoodTracker.Context.Sportplan
         public async Task<List<ExerciseModel>> GetAllExercisesAsync()
         {
             await Init();
+            if (_database == null)
+            {
+                return new List<ExerciseModel>();
+            }
             return await _database.Table<ExerciseModel>().ToListAsync();
         }
         #endregion
@@ -88,11 +99,16 @@ namespace SportFoodTracker.Context.Sportplan
         {
             await Init();
 
+            if (_database == null)
+            {
+                return new SportsplanModel();
+            }
+
             var sportsplan = await _database.Table<SportsplanModel>()
                                              .Where(sp => sp.Id == id)
                                              .FirstOrDefaultAsync();
             if (sportsplan == null)
-                return null;
+                return null!;
 
             var trainings = await _database.Table<TrainingsplanModel>()
                                            .Where(tp => tp.SportsplanId == id)
@@ -117,11 +133,16 @@ namespace SportFoodTracker.Context.Sportplan
         {
             await Init();
 
+            if (_database == null)
+            {
+                return new TrainingsplanModel();
+            }
+
             var tp = await _database.Table<TrainingsplanModel>()
                                     .Where(t => t.Id == id)
                                     .FirstOrDefaultAsync();
             if (tp == null)
-                return null;
+                return null!;
 
             tp.Exercise = await _database.Table<ExerciseModel>()
                                          .Where(ex => ex.TrainingsplanId == tp.Id)
@@ -135,6 +156,10 @@ namespace SportFoodTracker.Context.Sportplan
         public async Task<ExerciseModel> GetExerciseByIdAsync(int id)
         {
             await Init();
+            if (_database == null)
+            {
+                return new ExerciseModel();
+            }
             return await _database.Table<ExerciseModel>().Where(ex => ex.Id == id).FirstOrDefaultAsync();
         }
         #endregion
@@ -143,7 +168,10 @@ namespace SportFoodTracker.Context.Sportplan
         public async Task<int> SaveSportplanAsync(SportsplanModel sportplan)
         {
             await Init();
-
+            if (_database == null)
+            {
+                return 0;
+            }
             await _database.RunInTransactionAsync(conn =>
             {
                 // Sportsplan
@@ -192,7 +220,10 @@ namespace SportFoodTracker.Context.Sportplan
                 throw new ArgumentNullException(nameof(sportsplan));
 
             await Init();
-
+            if (_database == null)
+            {
+                return;
+            }
             var trainings = await GetTrainingsplanByIdAsync(sportsplan.Id);
 
             await _database.RunInTransactionAsync(conn =>

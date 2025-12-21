@@ -11,7 +11,7 @@ namespace SportFoodTracker.Context.ErnaehrungsplanDatabase
 {
     public class NutritionPlanDatabase
     {
-        private SQLiteAsyncConnection _database;
+        private SQLiteAsyncConnection? _database;
 
         /// <summary>
         /// Creates and initializes the database connection if it hasn't been created yet.
@@ -30,18 +30,30 @@ namespace SportFoodTracker.Context.ErnaehrungsplanDatabase
         public async Task<List<NutritionplanModel>> GetErnaehrungsplanList()
         {
             await Init();
+            if (_database == null)
+            {
+                return new List<NutritionplanModel>();
+            }
             return await _database.Table<NutritionplanModel>().ToListAsync();
         }
 
         public async Task<List<FoodModel>> GetEssenList()
         {
             await Init();
+            if (_database == null)
+            {
+                return new List<FoodModel>();
+            }
             return await _database.Table<FoodModel>().ToListAsync();
         }
 
         public async Task<List<NutritionalValuesModel>> GetNaehrwertList()
         {
             await Init();
+            if (_database == null)
+            {
+                return new List<NutritionalValuesModel>();
+            }
             return await _database.Table<NutritionalValuesModel>().ToListAsync();
         }
         #endregion
@@ -50,18 +62,30 @@ namespace SportFoodTracker.Context.ErnaehrungsplanDatabase
         public async Task<NutritionplanModel> GetSportplan(int id)
         {
             await Init();
+            if (_database == null)
+            {
+                return new NutritionplanModel();
+            }
             return await _database.Table<NutritionplanModel>().Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<FoodModel> GetTrainingsplan(int id)
         {
             await Init();
+            if (_database == null)
+            {
+                return new FoodModel();
+            }
             return await _database.Table<FoodModel>().Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<NutritionalValuesModel> GetUebung(int id)
         {
             await Init();
+            if (_database == null)
+            {
+                return new NutritionalValuesModel();
+            }
             return await _database.Table<NutritionalValuesModel>().Where(x => x.Id == id).FirstOrDefaultAsync();
         }
         #endregion
@@ -72,10 +96,18 @@ namespace SportFoodTracker.Context.ErnaehrungsplanDatabase
             await Init();
             if (ernaerungsplan.Id != 0)
             {
+                if (_database == null)
+                {
+                    return 0;
+                }
                 return await _database.UpdateAsync(ernaerungsplan);
             }
             else
             {
+                if (_database == null)
+                {
+                    return 0;
+                }
                 return await _database.InsertAsync(ernaerungsplan);
             }
         }
@@ -85,6 +117,10 @@ namespace SportFoodTracker.Context.ErnaehrungsplanDatabase
         public async Task<int> DeleteSportplanAsync(NutritionplanModel ernaerungsplan)
         {
             await Init();
+            if (_database == null)
+            {
+                return 0;
+            }
             return await _database.DeleteAsync(ernaerungsplan);
         }
         #endregion

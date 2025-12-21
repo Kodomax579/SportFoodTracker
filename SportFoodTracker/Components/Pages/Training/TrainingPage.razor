@@ -81,13 +81,13 @@
 
 
 @code {
-    public TrainingsplanModel trainingPlan;
+    public TrainingsplanModel? trainingPlan;
     public DateTime startTraining;
     public DateTime endTraining;
 
     public Dictionary<ExerciseModel, List<RepetionsModel>> exerciseRepetitions = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         trainingPlan = sportsplanService.GetTodaysTrainingsPlanAsync(DateTime.Now.DayOfWeek.ToString());
 
@@ -123,7 +123,7 @@
         trainingModel.Date = DateTime.Now.Date;
         trainingModel.time = (endTraining - startTraining).Minutes;
         trainingModel.IsDone = true;
-        foreach (var exercise in trainingPlan.Exercise)
+        foreach (var exercise in trainingPlan!.Exercise)
         {
             foreach (var rep in exerciseRepetitions[exercise])
             {

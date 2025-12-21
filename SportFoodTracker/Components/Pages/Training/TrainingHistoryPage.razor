@@ -47,7 +47,7 @@
 
                             <!-- Exercise title -->
                             <h5 class="fw-semibold mb-2">
-                                @exerciseGroup.Key.Description
+                                @exerciseGroup.Key!.Description
                             </h5>
 
                             <!-- Sets table -->
@@ -84,7 +84,7 @@
 </div>
 
 @code {
-    public List<TrainingModel> trainingList;
+    public List<TrainingModel>? trainingList;
 
     protected override async Task OnInitializedAsync()
     {

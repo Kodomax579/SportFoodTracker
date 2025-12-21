@@ -16,6 +16,6 @@ namespace SportFoodTracker.Models.Ernähungsplan
         public string? DayOfWeek { get; set; }
         public string? Description { get; set; }
         public int Weight { get; set; }
-        public NutritionalValuesModel NutritionalValues{ get; set; }
+        public NutritionalValuesModel? NutritionalValues{ get; set; }
     }
 }

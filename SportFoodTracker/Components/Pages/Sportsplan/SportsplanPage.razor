@@ -35,7 +35,7 @@ else
                     <div class="card-body bg-light rounded">
                         <label class="form-label fw-semibold">Name des Plans</label>
                         <input type="text" class="form-control form-control-lg border-0 shadow-sm"
-                               placeholder="z.B. Ganzkörper Krafttraining" @bind="sportsplan.Description" />
+                               placeholder="z.B. Ganzkörper Krafttraining" @bind="sportsplan!.Description" />
                     </div>
                 </div>
 
@@ -44,8 +44,8 @@ else
                     @{
                         // Logik-Mapping für die Anzeige
                         var daysToDisplay = id.HasValue
-                        ? sportsplan.Trainingsplan.Select(t => (t.DayOfWeek, t))
-                        : Enum.GetValues<Weekday>().Select(d => (d, (TrainingsplanModel)null));
+                        ? sportsplan.Trainingsplan.Select(t => (t.DayOfWeek, t))!
+                        : Enum.GetValues<Weekday>().Select(d => (d, (TrainingsplanModel)null!));
                     }
 
                     @foreach (var (day, training) in daysToDisplay)
@@ -166,7 +166,7 @@ else
     [Parameter]
     public int? id{ get; set; }
     private Weekday? activeDay;
-    public SportsplanModel sportsplan;
+    public SportsplanModel? sportsplan;
 
     public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
     .ToDictionary(day => day, day => new List<ExerciseModel>());
@@ -197,11 +197,19 @@ else
     {
         if (IsEditMode)
         {
+            if (sportsplan == null)
+            {
+                return;
+            }
             UpdateExistingSportsplan();
             await SportsplanService.UpdateSportsplan(sportsplan);
         }
         else
         {
+            if (sportsplan == null)
+            {
+                return;
+            }
             BuildNewSportsplan();
             await SportsplanService.CreateNewSportsplan(sportsplan);
         }
@@ -211,6 +219,10 @@ else
 
     private void BuildNewSportsplan()
     {
+        if (sportsplan == null)
+        {
+            return;
+        }
         sportsplan.Trainingsplan = new List<TrainingsplanModel>();
 
         foreach (Weekday day in Enum.GetValues<Weekday>())
@@ -231,6 +243,10 @@ else
     }
     private void UpdateExistingSportsplan()
     {
+        if (sportsplan == null)
+        {
+            return;
+        }
         foreach (var training in sportsplan.Trainingsplan)
         {
             if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
@@ -266,6 +282,10 @@ else
 
     private void MapTrainingsplanToExervicesPerDay()
     {
+        if (sportsplan == null)
+        {
+            return;
+        }
         foreach(var day in Enum.GetValues<Weekday>())
         {
             ExercisesPerDay[day].Clear();
