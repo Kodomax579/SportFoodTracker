@@ -2,7 +2,7 @@
 @using SportFoodTracker.Service
 @using SportFoodTracker.Models.Sportsplan
 @using SportFoodTracker.Models.Training
-@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Models.enums
 @inject SportsplanService sportsplanService
 @inject TrainingService trainingService
 @inject NavigationManager NavigationManager
@@ -87,6 +87,9 @@
 
     public Dictionary<ExerciseModel, List<RepetionsModel>> exerciseRepetitions = new();
 
+    /// <summary>
+    /// Initializes the component and loads today's training plan.
+    /// </summary>
     protected override void OnInitialized()
     {
         trainingPlan = sportsplanService.GetTodaysTrainingsPlanAsync(DateTime.Now.DayOfWeek.ToString());
@@ -113,6 +116,10 @@
         }
     }
 
+    /// <summary>
+    /// End the training and create saves the training data.
+    /// </summary>
+    /// <returns></returns>
     public async Task EndTraining()
     {
         endTraining = DateTime.Now;

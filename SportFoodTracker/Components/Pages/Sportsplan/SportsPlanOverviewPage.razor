@@ -1,6 +1,6 @@
 ﻿@page "/sportsplan-overview"
 @using SportFoodTracker.Models.Sportsplan
-@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Models.enums
 @using SportFoodTracker.Service
 @inject SportsplanService SportsplanService
 @inject NavigationManager NavigationManager
@@ -101,32 +101,61 @@
     public List<SportsplanModel>? sportsplans;
     public DateTime dateTime;
 
+    /// <summary>
+    /// Initializes the component and loads all sports plans.
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         sportsplans = await SportsplanService.GetAllAsync();
         dateTime = DateTime.Now;
     }
 
+    /// <summary>
+    /// Navigates to the page for adding a new sports plan.
+    /// </summary>
     public void onAddSportsplan()
     {
         NavigationManager.NavigateTo("/sportsplan");
     }
+
+    /// <summary>
+    /// Navigates to the page for editing an existing sports plan.
+    /// </summary>
+    /// <param name="id"></param>
     public void onEditSportsplan(int id)
     {
         NavigationManager.NavigateTo($"/sportsplan/{id}");
     }
+
+    /// <summary>
+    /// Delete specific sportsplan and refresh the list.
+    /// </summary>
+    /// <param name="sportsplan"></param>
+    /// <returns></returns>
     public async Task onDeleteSportsplan(SportsplanModel sportsplan)
     {
         await SportsplanService.DeleteSportsplan(sportsplan);
         sportsplans = await SportsplanService.GetAllAsync();
         StateHasChanged();
     }
+
+    /// <summary>
+    /// Activate specific sportsplan
+    /// </summary>
+    /// <param name="sportsplan"></param>
+    /// <returns></returns>
     public async Task onIsActive(SportsplanModel sportsplan)
     {
         sportsplan.IsActive = !sportsplan.IsActive;
         await SportsplanService.UpdateSportsplan(sportsplan);
     }
 
+    /// <summary>
+    /// Get Weekday from System DayOfWeek
+    /// </summary>
+    /// <param name="day"></param>
+    /// <returns></returns>
     Weekday GetWeekdayFromSystemDay(DayOfWeek day)
       => day == DayOfWeek.Sunday ? Weekday.Sunday : (Weekday)((int)day - 1);
 }

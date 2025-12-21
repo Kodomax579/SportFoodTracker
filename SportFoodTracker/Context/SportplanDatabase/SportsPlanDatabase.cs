@@ -15,15 +15,15 @@ namespace SportFoodTracker.Context.Sportplan
             if (_database != null)
                 return;
             _database = new SQLiteAsyncConnection(SportsPlanDbConstans.DatabasePath, SportsPlanDbConstans.Flags);
-            // Initialize your tables here if needed
             await _database.CreateTableAsync<ExerciseModel>();
             await _database.CreateTableAsync<TrainingsplanModel>();
             await _database.CreateTableAsync<SportsplanModel>();
         }
         #region --- Get Lists ---
         /// <summary>
-        /// Lädt alle Sportspläne inklusive Trainingspläne und Übungen.
+        /// Get all sportplans
         /// </summary>
+        /// <returns></returns>
         public async Task<List<SportsplanModel>> GetAllSportsplansAsync()
         {
             await Init();
@@ -37,13 +37,10 @@ namespace SportFoodTracker.Context.Sportplan
 
             var exercises = await _database.Table<ExerciseModel>().ToListAsync();
 
-
-                // Trainingspläne den Sportsplänen zuordnen
                 foreach (var sp in sportsplans)
                 {
                     var spTrainings = trainings.Where(tp => tp.SportsplanId == sp.Id).ToList();
 
-                    // Übungen den Trainingsplänen zuordnen
                     foreach (var tp in spTrainings)
                     {
                         tp.Exercise = exercises.Where(ex => ex.TrainingsplanId == tp.Id).ToList();
@@ -56,8 +53,9 @@ namespace SportFoodTracker.Context.Sportplan
         }
 
         /// <summary>
-        /// Lädt alle Trainingspläne inklusive Übungen.
+        /// Get all training plans
         /// </summary>
+        /// <returns></returns>
         public async Task<List<TrainingsplanModel>> GetAllTrainingsplansAsync()
         {
             await Init();
@@ -78,8 +76,9 @@ namespace SportFoodTracker.Context.Sportplan
         }
 
         /// <summary>
-        /// Lädt alle Übungen.
+        /// get all exercises
         /// </summary>
+        /// <returns></returns>
         public async Task<List<ExerciseModel>> GetAllExercisesAsync()
         {
             await Init();
@@ -93,8 +92,10 @@ namespace SportFoodTracker.Context.Sportplan
 
         #region --- Get Single Items ---
         /// <summary>
-        /// Lädt einen einzelnen Sportsplan inklusive Trainingspläne und Übungen.
+        /// get specific sport plan
         /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<SportsplanModel> GetSportsplanByIdAsync(int id)
         {
             await Init();
@@ -127,8 +128,10 @@ namespace SportFoodTracker.Context.Sportplan
         }
 
         /// <summary>
-        /// Lädt einen einzelnen Trainingsplan inklusive Übungen.
+        /// get a specific trainings plan
         /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<TrainingsplanModel> GetTrainingsplanByIdAsync(int id)
         {
             await Init();
@@ -151,8 +154,10 @@ namespace SportFoodTracker.Context.Sportplan
         }
 
         /// <summary>
-        /// Lädt eine einzelne Übung.
+        /// get specific exersice
         /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ExerciseModel> GetExerciseByIdAsync(int id)
         {
             await Init();
@@ -165,6 +170,11 @@ namespace SportFoodTracker.Context.Sportplan
         #endregion
 
         #region --- Save Items ---
+        /// <summary>
+        /// save or update sport plan
+        /// </summary>
+        /// <param name="sportplan"></param>
+        /// <returns></returns>
         public async Task<int> SaveSportplanAsync(SportsplanModel sportplan)
         {
             await Init();
@@ -214,6 +224,12 @@ namespace SportFoodTracker.Context.Sportplan
         #endregion
 
         #region --- Delete Items ---
+        /// <summary>
+        /// Delete specific sports plan
+        /// </summary>
+        /// <param name="sportsplan"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task DeleteSportplanAsync(SportsplanModel sportsplan)
         {
             if (sportsplan == null)

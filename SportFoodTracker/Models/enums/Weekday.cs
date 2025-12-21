@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SportFoodTracker.Models.Sportsplan.enums
+namespace SportFoodTracker.Models.enums
 {
     public enum Weekday
     {

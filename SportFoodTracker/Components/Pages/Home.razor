@@ -2,7 +2,7 @@
 @using SportFoodTracker.Components.Pages
 @using SportFoodTracker.Models.Sportsplan
 @using SportFoodTracker.Service
-@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Models.enums
 @using SportFoodTracker.Models.Training
 @inject NavigationManager NavigationManager
 @inject SportsplanService SportsplanService
@@ -53,7 +53,7 @@
             <h5 class="mb-0">Todays Training</h5>
             <button class="btn btn-sm @(isTrainingDoneToday ? "btn-success" : "btn-outline-light")"
                     disabled="@isTrainingDoneToday"
-                    @onclick="InsertTrainingData">
+                    @onclick="StartTraining">
                 @(isTrainingDoneToday ? "✔ Training Done" : "Start")
             </button>
         </div>
@@ -107,17 +107,28 @@
     public TrainingModel? trainingModel;
     public bool isTrainingDoneToday;
 
+    /// <summary>
+    /// initialize active sportplan and check if training is done today
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         sportsplan = await SportsplanService.GetActiveSportsplanAsync();
         isTrainingDoneToday = await TrainingService.IsTodayTrainingDoneAsync();
     }
 
+    /// <summary>
+    /// Navigates to sportsplan overview
+    /// </summary>
     private void NavigateToExerciseOverview()
     {
         NavigationManager.NavigateTo("/sportsplan-overview");
     }
 
+    /// <summary>
+    /// get todays trainings plan
+    /// </summary>
+    /// <returns></returns>
     public TrainingsplanModel GetTodayTrainingsplan()
     {
         if (sportsplan == null || sportsplan.Trainingsplan == null)
@@ -128,7 +139,11 @@
         return sportsplan.Trainingsplan
             .FirstOrDefault(tp => tp.DayOfWeek.ToString() == today.ToString()) ?? new TrainingsplanModel();
     }
-    public void InsertTrainingData()
+
+    /// <summary>
+    /// Navigate and start training
+    /// </summary>
+    public void StartTraining()
     {
         NavigationManager.NavigateTo("/training");
     }

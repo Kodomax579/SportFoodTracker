@@ -1,4 +1,4 @@
-﻿using SportFoodTracker.Models.Sportsplan.enums;
+﻿using SportFoodTracker.Models.enums;
 using SQLite;
 using System;
 using System.Collections.Generic;

@@ -26,6 +26,10 @@ namespace SportFoodTracker.Context.TrainingDatabase
             await _database.CreateTableAsync<TrainingModel>();
         }
 
+        /// <summary>
+        /// get all trainings
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<TrainingModel>> GetAllTrainingsAsync()
         {
             await Init();
@@ -46,6 +50,11 @@ namespace SportFoodTracker.Context.TrainingDatabase
             return trainings;
         }
 
+        /// <summary>
+        /// get specific training
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<TrainingModel> GetTrainingByIdAsync(int id)
         {
             await Init();
@@ -67,6 +76,11 @@ namespace SportFoodTracker.Context.TrainingDatabase
             return training!;
         }
 
+        /// <summary>
+        /// create or update training
+        /// </summary>
+        /// <param name="training"></param>
+        /// <returns></returns>
         public async Task<int> SaveTrainingAsync(TrainingModel training)
         {
             await Init();

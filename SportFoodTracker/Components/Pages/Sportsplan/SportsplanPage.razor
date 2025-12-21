@@ -1,6 +1,6 @@
 ﻿@page "/sportsplan/{id:int?}"
 @using SportFoodTracker.Models.Sportsplan
-@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Models.enums
 @using SportFoodTracker.Service
 @inject SportsplanService SportsplanService
 @inject NavigationManager NavigationManager
@@ -173,6 +173,11 @@ else
 
     bool IsEditMode => id.HasValue;
     public bool isLoading = true;
+
+    /// <summary>
+    /// Initializes the component by loading the sports plan if an ID is provided.
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if(id.HasValue)
@@ -188,11 +193,19 @@ else
         isLoading = false;
     }
 
+    /// <summary>
+    /// Add a new exercise to the specified weekday.
+    /// </summary>
+    /// <param name="weekday"></param>
     public void OnAddExercise(Weekday weekday)
     {
         ExercisesPerDay[weekday].Add(new ExerciseModel());
     }
 
+    /// <summary>
+    /// Create or Update sportsplan 
+    /// </summary>
+    /// <returns></returns>
     public async Task OnSubmit()
     {
         if (IsEditMode)
@@ -217,6 +230,9 @@ else
         NavigationManager.NavigateTo("/sportsplan-overview");
     }
 
+    /// <summary>
+    /// Build new sportsplan object
+    /// </summary>
     private void BuildNewSportsplan()
     {
         if (sportsplan == null)
@@ -241,6 +257,10 @@ else
             });
         }
     }
+
+    /// <summary>
+    /// Update existing sportplan object
+    /// </summary>
     private void UpdateExistingSportsplan()
     {
         if (sportsplan == null)
@@ -264,6 +284,11 @@ else
                 .ToList();
         }
     }
+
+    /// <summary>
+    /// set or unset active day
+    /// </summary>
+    /// <param name="day"></param>
     private void ToggleDay(Weekday day)
     {
         if (activeDay == day)
@@ -272,6 +297,11 @@ else
             activeDay = day;
     }
 
+    /// <summary>
+    /// Remove exercise from specified day
+    /// </summary>
+    /// <param name="day"></param>
+    /// <param name="exercise"></param>
     private void OnRemoveExercise(Weekday day, ExerciseModel exercise)
     {
         if (ExercisesPerDay.ContainsKey(day))
@@ -280,6 +310,9 @@ else
         }
     }
 
+    /// <summary>
+    /// map trainingsplan to exervices per day
+    /// </summary>
     private void MapTrainingsplanToExervicesPerDay()
     {
         if (sportsplan == null)
