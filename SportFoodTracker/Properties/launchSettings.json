@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Windows Machine": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnectionErnaerungplan": "Data Source=Ernaerungsplan.db",
+    "DefaultConnectionSportplan": "Data Source=Sportplan.db"
+  }
+}

@@ -1,0 +1,142 @@
+﻿@page "/"
+@using SportFoodTracker.Components.Pages
+@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Service
+@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Models.Training
+@inject NavigationManager NavigationManager
+@inject SportsplanService SportsplanService
+@inject TrainingService TrainingService
+
+<div class="container mt-3">
+    <header class="text-center mb-4">
+        <h2 class="fw-bold">@DateTime.Today.DayOfWeek.ToString()</h2>
+        <p class="text-muted">Dein heutiger Status</p>
+    </header>
+
+    <div class="row mb-4 text-center">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-uppercase small text-muted">Verfügbare Kalorien</h5>
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Protein</h6>
+                    @* <div class="fw-bold text-info">@RemainingProtein g</div> *@
+                    <small>übrig</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Fett</h6>
+                    @* <div class="fw-bold text-warning">@RemainingFat g</div> *@
+                    <small>übrig</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <!-- Header -->
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Todays Training</h5>
+            <button class="btn btn-sm @(isTrainingDoneToday ? "btn-success" : "btn-outline-light")"
+                    disabled="@isTrainingDoneToday"
+                    @onclick="InsertTrainingData">
+                @(isTrainingDoneToday ? "✔ Training Done" : "Start")
+            </button>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (sportsplan == null)
+            {
+                <div class="text-center text-muted py-4">
+                    <div class="spinner-border"></div>
+                    <p class="mt-2 mb-0">load Trainingsplan…</p>
+                </div>
+            }
+            else if (!sportsplan.Trainingsplan.Any())
+            {
+                <div class="alert alert-info m-3 text-center">
+                    No trainingsplan found
+                </div>
+            }
+            else
+            {
+                var todayTraining = GetTodayTrainingsplan();
+
+                <div class="px-3 pt-3">
+                    <h4 class="fw-bold mb-1">@sportsplan.Description</h4>
+                    <small class="text-muted">Heutiges Training</small>
+                </div>
+                <hr />
+                @if (todayTraining?.Exercise?.Any() == true)
+                {
+                    <ul class="list-group list-group-flush mt-3">
+                        @foreach (var exercise in todayTraining.Exercise)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-medium">@exercise.Description</span>
+                                <span class="badge bg-secondary rounded-pill">
+                                    @exercise.Repetition ×
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4 mb-0">
+                        🛌 Heute ist Ruhetag
+                    </p>
+                }
+            }
+
+        </div>
+    </div>
+
+</div>
+
+@code {
+    public SportsplanModel sportsplan;
+    public TrainingModel trainingModel;
+    public bool isTrainingDoneToday;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sportsplan = await SportsplanService.GetActiveSportsplanAsync();
+        isTrainingDoneToday = await TrainingService.IsTodayTrainingDoneAsync();
+    }
+
+    private void NavigateToExerciseOverview()
+    {
+        NavigationManager.NavigateTo("/sportsplan-overview");
+    }
+
+    public TrainingsplanModel GetTodayTrainingsplan()
+    {
+        if (sportsplan == null || sportsplan.Trainingsplan == null)
+        {
+            return null;
+        }
+        var today = DateTime.Today.DayOfWeek;
+        return sportsplan.Trainingsplan
+            .FirstOrDefault(tp => tp.DayOfWeek.ToString() == today.ToString()) ?? new TrainingsplanModel();
+    }
+    public void InsertTrainingData()
+    {
+        NavigationManager.NavigateTo("/training");
+    }
+}

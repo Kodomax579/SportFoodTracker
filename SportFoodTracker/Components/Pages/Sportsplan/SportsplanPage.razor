@@ -1,0 +1,187 @@
+﻿@page "/sportsplan/{id:int?}"
+@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.Sportsplan.enums
+@using SportFoodTracker.Service
+@inject SportsplanService SportsplanService
+@inject NavigationManager NavigationManager
+
+@if(isLoading)
+{
+    <div>Loading...</div>
+}
+else if (id.HasValue)
+{
+    <h3>Sportplan bearbeiten</h3>
+    <input type="text" placeholder="Name" @bind="sportsplan.Description"/>
+    @foreach (TrainingsplanModel training in sportsplan.Trainingsplan)
+    {
+        <div class="mb-3">
+            <h4>@training.DayOfWeek</h4>
+
+            @for (int j = 0; j < ExercisesPerDay[training.DayOfWeek].Count; j++)
+            {
+                var exercise = ExercisesPerDay[training.DayOfWeek][j];
+                <div>
+                    <input type="text" placeholder="Exercise Name" @bind="exercise.Description" />
+                    <input type="number" placeholder="Repetition" @bind="exercise.Repetition" />
+                    <input type="number" placeholder="Sets" @bind="exercise.Sets" />
+                </div>
+            }
+
+            <button class="btn btn-sm btn-outline-primary"
+                    @onclick="() => OnAddExercise(training.DayOfWeek)">
+                + Übung
+            </button>
+        </div>
+    }
+}
+else
+{
+    <h3>Sportplan anlegen</h3>
+
+    <input type="text" placeholder="Name" @bind="sportsplan.Description" />
+    @foreach (Weekday day in Enum.GetValues(typeof(Weekday)))
+    {
+        <div class="mb-3">
+            <h4>@day</h4>
+
+            @for (int j = 0; j < ExercisesPerDay[day].Count; j++)
+            {
+                var exercise = ExercisesPerDay[day][j];
+                <div >
+                    <input type="text" placeholder="Exercise Name" @bind="exercise.Description" />
+                    <input type="number" placeholder="Repetition" @bind="exercise.Repetition" />
+                    <input type="number" placeholder="Sets" @bind="exercise.Sets" />
+                </div>
+            }
+
+            <button class="btn btn-sm btn-outline-primary"
+                    @onclick="() => OnAddExercise(day)">
+                + Übung
+            </button>
+        </div>
+    }
+}
+
+<button @onclick="OnSubmit">Submit</button>
+
+@code {
+    [Parameter]
+    public int? id{ get; set; }
+
+    public SportsplanModel sportsplan;
+
+    public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
+    .ToDictionary(day => day, day => new List<ExerciseModel>());
+
+    bool IsEditMode => id.HasValue;
+    public bool isLoading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        if(id.HasValue)
+        {
+            sportsplan = await SportsplanService.GetByIdAsync(id.Value);
+
+            MapTrainingsplanToExervicesPerDay();
+        }
+        else
+        {
+            sportsplan = new SportsplanModel();
+        }
+        isLoading = false;
+    }
+
+    public void OnAddExercise(Weekday weekday)
+    {
+        ExercisesPerDay[weekday].Add(new ExerciseModel());
+    }
+
+    public async Task OnSubmit()
+    {
+        if (IsEditMode)
+        {
+            UpdateExistingSportsplan();
+            await SportsplanService.UpdateSportsplan(sportsplan);
+        }
+        else
+        {
+            BuildNewSportsplan();
+            await SportsplanService.CreateNewSportsplan(sportsplan);
+        }
+
+        NavigationManager.NavigateTo("/sportsplan-overview");
+    }
+    private void BuildNewSportsplan()
+    {
+        sportsplan.Trainingsplan = new List<TrainingsplanModel>();
+
+        foreach (Weekday day in Enum.GetValues<Weekday>())
+        {
+            sportsplan.Trainingsplan.Add(new TrainingsplanModel
+            {
+                DayOfWeek = day,
+                Exercise = ExercisesPerDay[day]
+                    .Select(e => new ExerciseModel
+                    {
+                        Description = e.Description,
+                        Repetition = e.Repetition,
+                        Sets = e.Sets
+                    })
+                    .ToList()
+            });
+        }
+    }
+    private void UpdateExistingSportsplan()
+    {
+        foreach (var training in sportsplan.Trainingsplan)
+        {
+            if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
+                continue;
+
+            training.Exercise = ExercisesPerDay[training.DayOfWeek]
+                .Select(e => new ExerciseModel
+                {
+                    Id = e.Id,
+                    Description = e.Description,
+                    Repetition = e.Repetition,
+                    Sets = e.Sets,
+                    TrainingsplanId = training.Id
+                })
+                .ToList();
+        }
+    }
+
+
+    private void MapTrainingsplanToExervicesPerDay()
+    {
+        foreach(var day in Enum.GetValues<Weekday>())
+        {
+            ExercisesPerDay[day].Clear();
+        }
+
+        if(sportsplan.Trainingsplan == null)
+        {
+            return;
+        }
+
+        foreach (var training in sportsplan.Trainingsplan)
+        {
+            if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
+                continue;
+
+            if (training.Exercise == null)
+                continue;
+
+            ExercisesPerDay[training.DayOfWeek] = training.Exercise
+                .Select(e => new ExerciseModel
+                {
+                    Id = e.Id,
+                    Description = e.Description,
+                    Repetition = e.Repetition,
+                    Sets = e.Sets,
+                    TrainingsplanId = e.TrainingsplanId
+                })
+                .ToList();
+        }
+    }
+}

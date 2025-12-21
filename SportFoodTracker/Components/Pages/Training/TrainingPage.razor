@@ -1,0 +1,140 @@
+﻿@page "/training"
+@using SportFoodTracker.Service
+@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.Training
+@using SportFoodTracker.Models.Sportsplan.enums
+@inject SportsplanService sportsplanService
+@inject TrainingService trainingService
+@inject NavigationManager NavigationManager
+
+<div class="container my-4">
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">🏋️ Training</h1>
+        <p class="text-muted">Todays Trainingsplan</p>
+    </div>
+    @if (trainingPlan == null)
+    {
+        <div class="text-center text-muted">
+            <div class="spinner-border"></div>
+            <p class="mt-2">Loading training plan…</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var exercise in exerciseRepetitions)
+        {
+            <div class="card shadow-sm mb-4">
+                <!-- Exercise Header -->
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">@exercise.Key.Description</h4>
+                </div>
+
+                <div class="card-body">
+                    @foreach(var repetition in exercise.Value)
+                    {
+                        <div class="border rounded p-3 mb-3 bg-light">
+
+                            <!-- Set Header -->
+                            <h6 class="fw-semibold mb-3">
+                                Set @(exercise.Value.IndexOf(repetition) + 1)
+                                <span class="text-muted small">
+                                    (Ziel: @exercise.Key.Repetition Repetitions)
+                                </span>
+                            </h6>
+
+                            <!-- Inputs -->
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">
+                                        Repetitions
+                                    </label>
+                                    <input type="number"
+                                           class="form-control"
+                                           placeholder="z. B. 10"
+                                           @bind="repetition.Weight" />
+                                </div>
+
+                                <div class="col-6">
+                                    <label class="form-label small text-muted">
+                                        Weight (kg)
+                                    </label>
+                                    <input type="number"
+                                           class="form-control"
+                                           placeholder="z. B. 40"
+                                           @bind="repetition.Repetitions" />
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    <button @onclick="EndTraining">
+        End Training
+    </button>
+
+</div>
+
+
+@code {
+    public TrainingsplanModel trainingPlan;
+    public DateTime startTraining;
+    public DateTime endTraining;
+
+    public Dictionary<ExerciseModel, List<RepetionsModel>> exerciseRepetitions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        trainingPlan = sportsplanService.GetTodaysTrainingsPlanAsync(DateTime.Now.DayOfWeek.ToString());
+
+        startTraining = DateTime.Now;
+
+        exerciseRepetitions.Clear();
+
+        foreach (var exercise in trainingPlan.Exercise)
+        {
+            var reps = new List<RepetionsModel>();
+
+            for (int i = 0; i < exercise.Sets; i++)
+            {
+                reps.Add(new RepetionsModel
+                {
+                    Repetitions = 0,
+                    Weight = 0,
+                    Exercise = exercise
+                });
+            }
+
+            exerciseRepetitions[exercise] = reps;
+        }
+    }
+
+    public async Task EndTraining()
+    {
+        endTraining = DateTime.Now;
+
+        TrainingModel trainingModel = new TrainingModel();
+        trainingModel.Repetions = new List<RepetionsModel>();
+
+        trainingModel.Date = DateTime.Now.Date;
+        trainingModel.time = (endTraining - startTraining).Minutes;
+        trainingModel.IsDone = true;
+        foreach (var exercise in trainingPlan.Exercise)
+        {
+            foreach (var rep in exerciseRepetitions[exercise])
+            {
+                rep.Exercise = exercise;
+                trainingModel.Repetions.Add(rep);
+            }
+        }
+
+        await trainingService.SaveTrainingAsync(trainingModel);
+
+        NavigationManager.NavigateTo("/");
+    }
+
+}
