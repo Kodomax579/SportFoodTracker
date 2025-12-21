@@ -5,70 +5,167 @@
 @inject SportsplanService SportsplanService
 @inject NavigationManager NavigationManager
 
-@if(isLoading)
+@if (isLoading)
 {
-    <div>Loading...</div>
-}
-else if (id.HasValue)
-{
-    <h3>Sportplan bearbeiten</h3>
-    <input type="text" placeholder="Name" @bind="sportsplan.Description"/>
-    @foreach (TrainingsplanModel training in sportsplan.Trainingsplan)
-    {
-        <div class="mb-3">
-            <h4>@training.DayOfWeek</h4>
-
-            @for (int j = 0; j < ExercisesPerDay[training.DayOfWeek].Count; j++)
-            {
-                var exercise = ExercisesPerDay[training.DayOfWeek][j];
-                <div>
-                    <input type="text" placeholder="Exercise Name" @bind="exercise.Description" />
-                    <input type="number" placeholder="Repetition" @bind="exercise.Repetition" />
-                    <input type="number" placeholder="Sets" @bind="exercise.Sets" />
-                </div>
-            }
-
-            <button class="btn btn-sm btn-outline-primary"
-                    @onclick="() => OnAddExercise(training.DayOfWeek)">
-                + Übung
-            </button>
+    <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
-    }
+    </div>
 }
 else
 {
-    <h3>Sportplan anlegen</h3>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
 
-    <input type="text" placeholder="Name" @bind="sportsplan.Description" />
-    @foreach (Weekday day in Enum.GetValues(typeof(Weekday)))
-    {
-        <div class="mb-3">
-            <h4>@day</h4>
-
-            @for (int j = 0; j < ExercisesPerDay[day].Count; j++)
-            {
-                var exercise = ExercisesPerDay[day][j];
-                <div >
-                    <input type="text" placeholder="Exercise Name" @bind="exercise.Description" />
-                    <input type="number" placeholder="Repetition" @bind="exercise.Repetition" />
-                    <input type="number" placeholder="Sets" @bind="exercise.Sets" />
+                @* Header Sektion *@
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                    <h2 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        @(id.HasValue ? "Sportplan bearbeiten" : "Neuen Sportplan anlegen")
+                    </h2>
+                    <button class="btn btn-primary shadow-sm" @onclick="OnSubmit">
+                        <i class="bi bi-check-lg"></i> Speichern
+                    </button>
                 </div>
-            }
 
-            <button class="btn btn-sm btn-outline-primary"
-                    @onclick="() => OnAddExercise(day)">
-                + Übung
-            </button>
+                @* Allgemeine Infos *@
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body bg-light rounded">
+                        <label class="form-label fw-semibold">Name des Plans</label>
+                        <input type="text" class="form-control form-control-lg border-0 shadow-sm"
+                               placeholder="z.B. Ganzkörper Krafttraining" @bind="sportsplan.Description" />
+                    </div>
+                </div>
+
+                @* Tage Iteration *@
+                <div class="row g-4">
+                    @{
+                        // Logik-Mapping für die Anzeige
+                        var daysToDisplay = id.HasValue
+                        ? sportsplan.Trainingsplan.Select(t => (t.DayOfWeek, t))
+                        : Enum.GetValues<Weekday>().Select(d => (d, (TrainingsplanModel)null));
+                    }
+
+                    @foreach (var (day, training) in daysToDisplay)
+                    {
+                        bool isActive = activeDay == day;
+
+                        <div class="col-12 mb-3">
+                            @* Auf 12 Spalten geändert für bessere Zeilenoptik *@
+                            <div class="card border-0 shadow-sm @(isActive ? "ring-active" : "bg-light-subtle")"
+                                 style="cursor: pointer; transition: all 0.3s ease;">
+
+                                @* Header als Klick-Fläche *@
+                                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3"
+                                     @onclick="() => ToggleDay(day)">
+                                    <h5 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                                        <span class="badge @(isActive ? "bg-primary" : "bg-secondary") me-3">
+                                            @day.ToString().Substring(0, 2)
+                                        </span>
+                                        @day
+                                        <small class="text-muted ms-3 fw-normal" style="font-size: 0.8rem;">
+                                            @(ExercisesPerDay[day].Count) Übungen
+                                        </small>
+                                    </h5>
+                                    <i class="bi @(isActive ? "bi-chevron-up" : "bi-chevron-down") text-muted"></i>
+                                </div>
+
+                                @* Body nur zeigen, wenn dieser Tag aktiv ist *@
+                                @if (isActive)
+                                {
+                                    <div class="card-body pt-0 animate-fade-in">
+                                        <hr class="mt-0 opacity-10" />
+                                        @if (ExercisesPerDay.ContainsKey(day))
+                                        {
+                                            @foreach (var exercise in ExercisesPerDay[day])
+                                            {
+                                                <div class="exercise-row position-relative p-3 mb-3 rounded-3 border shadow-sm bg-white">
+                                                    <div class="row g-3 align-items-center">
+                                                        <div class="col-12 col-lg-6">
+                                                            <label class="form-label small text-muted mb-1">Übung</label>
+                                                            <input type="text" class="form-control border-0 bg-light" @bind="exercise.Description" placeholder="Übungsname..." />
+                                                        </div>
+                                                        <div class="col-6 col-lg-3">
+                                                            <label class="form-label small text-muted mb-1 fw-bold text-primary">Sätze</label>
+                                                            <input type="number" class="form-control" @bind="exercise.Sets" />
+                                                        </div>
+                                                        <div class="col-6 col-lg-3">
+                                                            <label class="form-label small text-muted mb-1 fw-bold text-success">Wdh.</label>
+                                                            <input type="number" class="form-control" @bind="exercise.Repetition" />
+                                                        </div>
+                                                    </div>
+
+                                                    @* Delete-Button immer oben rechts, absolute Position *@
+                                                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                                            @onclick="() => OnRemoveExercise(day, exercise)"
+                                                            title="Übung löschen">
+                                                        <i class="bi bi-trash3-fill">X</i>
+                                                    </button>
+                                                </div>
+                                            }
+                                        }
+                                        <button class="btn btn-outline-primary w-100 py-2 border-dashed mt-2"
+                                                @onclick="() => OnAddExercise(day)">
+                                            <i class="bi bi-plus-lg me-2"></i> Übung zu @day hinzufügen
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
-    }
+    </div>
 }
 
-<button @onclick="OnSubmit">Submit</button>
+<style>
+    .ring-active {
+        border-left: 5px solid #0d6efd !important;
+        background-color: white !important;
+    }
+
+    .border-dashed {
+        border-style: dashed !important;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .exercise-row:hover {
+        background-color: #fbfbfb !important;
+        border-color: #dee2e6 !important;
+    }
+
+    .exercise-row .btn-danger {
+        transition: transform 0.2s;
+    }
+
+    .exercise-row .btn-danger:hover {
+        transform: scale(1.2);
+    }
+
+</style>
 
 @code {
     [Parameter]
     public int? id{ get; set; }
-
+    private Weekday? activeDay;
     public SportsplanModel sportsplan;
 
     public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
@@ -111,6 +208,7 @@ else
 
         NavigationManager.NavigateTo("/sportsplan-overview");
     }
+
     private void BuildNewSportsplan()
     {
         sportsplan.Trainingsplan = new List<TrainingsplanModel>();
@@ -150,7 +248,21 @@ else
                 .ToList();
         }
     }
+    private void ToggleDay(Weekday day)
+    {
+        if (activeDay == day)
+            activeDay = null;
+        else
+            activeDay = day;
+    }
 
+    private void OnRemoveExercise(Weekday day, ExerciseModel exercise)
+    {
+        if (ExercisesPerDay.ContainsKey(day))
+        {
+            ExercisesPerDay[day].Remove(exercise);
+        }
+    }
 
     private void MapTrainingsplanToExervicesPerDay()
     {
