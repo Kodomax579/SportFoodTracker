@@ -1,0 +1,100 @@
+﻿@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Service
+@using SportFoodTracker.Models.enums
+@inject NavigationManager navigationManager
+@inject SportsplanService sportsplanService
+
+<div class="col-12 col-md-6 col-lg-4">
+    <div class="card h-100 shadow-sm border-0 sportsplan-card">
+        <div class="card-body d-flex flex-column">
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title fw-semibold">@Sportsplan.Description</h5>
+                <span class="badge @(Sportsplan.IsActive ? "bg-success" : "bg-secondary")">
+                    @(Sportsplan.IsActive ? "Active" : "Inactive")
+                </span>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group mb-3" role="group">
+                <button class="btn btn-outline-primary btn-sm" @onclick="() => onEditSportsplan(Sportsplan.Id)">
+                    Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="() => onDeleteSportsplan()">
+                    Delete
+                </button>
+                <button class="btn btn-outline-success btn-sm" @onclick="SetPlanToActive">
+                    Toggle Active
+                </button>
+            </div>
+
+            <hr />
+
+            <!-- Today's Training -->
+            @{
+                var todayTraining = Sportsplan.Trainingsplan?.FirstOrDefault(t => t.DayOfWeek == Dayweek);
+            }
+
+            @if (todayTraining?.Exercise?.Any() == true)
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var exercise in todayTraining.Exercise)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 border-0">
+                            <span>@exercise.Description</span>
+                            <span class="badge bg-secondary rounded-pill">@exercise.Repetition ×</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted small mb-0 text-center">Restday</p>
+            }
+
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public WorkoutModel? Sportsplan { get; set; }
+
+    [Parameter]
+    public Weekday Dayweek { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsSportsplanDeleted { get; set; }
+
+
+    /// <summary>
+    /// Navigates to the page for editing an existing sports plan.
+    /// </summary>
+    /// <param name="id"></param>
+    public void onEditSportsplan(int id)
+    {
+        navigationManager.NavigateTo($"/sportsplan/{id}");
+    }
+
+    /// <summary>
+    /// Delete specific sportsplan and refresh the list.
+    /// </summary>
+    /// <param name="sportsplan"></param>
+    /// <returns></returns>
+    public async Task onDeleteSportsplan()
+    {
+        await sportsplanService.DeleteSportsplan(Sportsplan);
+        await IsSportsplanDeleted.InvokeAsync(true);
+    }
+
+    /// <summary>
+    /// Activate specific sportsplan
+    /// </summary>
+    /// <param name="sportsplan"></param>
+    /// <returns></returns>
+    public async Task SetPlanToActive()
+    {
+        Sportsplan.IsActive = !Sportsplan.IsActive;
+        await sportsplanService.UpdateSportsplan(Sportsplan);
+    }
+}

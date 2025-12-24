@@ -1,0 +1,129 @@
+﻿@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.enums
+
+<div class="card shadow-sm border-0 p-4 exercise-card">
+
+    <!-- Row 1 -->
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <label class="form-label small text-muted">Exercise</label>
+            <input type="text"
+                   class="form-control form-control-lg bg-light border-0"
+                   @bind="exercise!.Description"
+                   placeholder="Exercise name..." />
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <label class="form-label small text-muted fw-bold text-primary">
+                Sets
+            </label>
+            <input type="number"
+                   class="form-control form-control-lg text-center"
+                   @bind="exercise.Sets"
+                   min="1" />
+        </div>
+    </div>
+
+    <!-- Row 2: Training Parameter -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <label class="form-label small text-muted fw-bold mb-3 d-block">
+                Training Parameter
+            </label>
+
+            <InputRadioGroup @bind-Value="trainingParameter"
+                             class="parameter-group justify-content-center">
+                <InputRadio Value="TrainingParameter.Repetition" />
+                <label>Reps</label>
+
+                <InputRadio Value="TrainingParameter.Meter" />
+                <label>Meter</label>
+
+                <InputRadio Value="TrainingParameter.Time" />
+                <label>Time</label>
+            </InputRadioGroup>
+        </div>
+    </div>
+
+    <!-- Row 3: Dynamic input -->
+    <div class="row mt-4 justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="parameter-card text-center">
+                @switch (trainingParameter)
+                {
+                    case TrainingParameter.Repetition:
+                        trainingParameter = TrainingParameter.Repetition;
+                        <label class="form-label fw-bold text-success">
+                            Repetitions
+                        </label>
+                        <input type="number"
+                        class="form-control form-control-lg text-center"
+                               @bind="exercise.Repetition"
+                               placeholder="e.g. 12" />
+                        break;
+
+                    case TrainingParameter.Meter:
+                        trainingParameter = TrainingParameter.Meter;
+                        <label class="form-label fw-bold text-success">
+                            Distance (m)
+                        </label>
+                        <input type="number"
+                               class="form-control form-control-lg text-center"
+                               @bind="exercise.Meter"
+                               placeholder="e.g. 400" />
+                        break;
+
+                    case TrainingParameter.Time:
+                        trainingParameter = TrainingParameter.Time;
+                        <label class="form-label fw-bold text-success">
+                            Time
+                        </label>
+                        <input type="time"
+                               class="form-control form-control-lg text-center"
+                               @bind="exercise.Time" />
+                        break;
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Action -->
+    <div class="mt-4 text-center">
+        <button class="btn btn-success btn-lg px-5" @onclick="OnAddExercise">
+            Add Exercise
+        </button>
+    </div>
+</div>
+
+
+<style>
+    .parameter-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .parameter-group label {
+        min-width: 120px;
+    }
+
+
+</style>
+@code {
+    [Parameter]
+    public ExerciseModel? exercise { get; set; }
+    [Parameter]
+    public EventCallback<ExerciseModel> ExerciseData { get; set; }
+
+    public TrainingParameter trainingParameter;
+
+    public void OnAddExercise()
+    {
+        if(exercise == null)
+        {
+            throw new ArgumentNullException("exercise is null");
+        }
+        exercise.trainingParameter = trainingParameter;
+        exercise.IsCreated = true;
+        ExerciseData.InvokeAsync(exercise);
+    }
+}

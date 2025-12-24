@@ -41,7 +41,7 @@
 
                 <div class="card-body">
 
-                    @foreach (var exerciseGroup in training.Repetions.GroupBy(r => r.Exercise))
+                    @foreach (var exerciseGroup in training.TrainingSets.GroupBy(r => r.Exercise))
                     {
                         <div class="mb-4">
 

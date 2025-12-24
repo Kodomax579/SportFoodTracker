@@ -85,7 +85,7 @@
     public DateTime startTraining;
     public DateTime endTraining;
 
-    public Dictionary<ExerciseModel, List<RepetionsModel>> exerciseRepetitions = new();
+    public Dictionary<ExerciseModel, List<TrainingSetModel>> exerciseRepetitions = new();
 
     /// <summary>
     /// Initializes the component and loads today's training plan.
@@ -100,11 +100,11 @@
 
         foreach (var exercise in trainingPlan.Exercise)
         {
-            var reps = new List<RepetionsModel>();
+            var reps = new List<TrainingSetModel>();
 
             for (int i = 0; i < exercise.Sets; i++)
             {
-                reps.Add(new RepetionsModel
+                reps.Add(new TrainingSetModel
                 {
                     Repetitions = 0,
                     Weight = 0,
@@ -125,7 +125,7 @@
         endTraining = DateTime.Now;
 
         TrainingModel trainingModel = new TrainingModel();
-        trainingModel.Repetions = new List<RepetionsModel>();
+        trainingModel.TrainingSets = new List<TrainingSetModel>();
 
         trainingModel.Date = DateTime.Now.Date;
         trainingModel.time = (endTraining - startTraining).Minutes;
@@ -135,7 +135,7 @@
             foreach (var rep in exerciseRepetitions[exercise])
             {
                 rep.Exercise = exercise;
-                trainingModel.Repetions.Add(rep);
+                trainingModel.TrainingSets.Add(rep);
             }
         }
 

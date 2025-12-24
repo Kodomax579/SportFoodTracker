@@ -1,0 +1,37 @@
+﻿@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.enums
+
+<div class="row g-3 align-items-center" @onclick="() => OnClick.InvokeAsync(exercise)">
+    <div class="col-12 col-lg-6">
+        <p>Exercise: @exercise!.Description</p>
+    </div>
+    <div class="col-6 col-lg-3">
+       <p>Sets: @exercise.Sets</p>
+    </div>
+    <div class="col-6 col-lg-3">
+        @if(exercise != null)
+        {
+            @if(exercise.trainingParameter == TrainingParameter.Repetition)
+            {
+                <p>Repetitions: @exercise.Repetition</p>
+            }
+            else if(exercise.trainingParameter == TrainingParameter.Meter)
+            {
+                <p>Meter: @exercise.Meter</p>
+            }
+            else if(exercise.trainingParameter == TrainingParameter.Time)
+            {
+                <p>Time: @exercise.Time</p>
+            }
+            
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ExerciseModel? exercise { get; set; }
+
+    [Parameter]
+    public EventCallback<ExerciseModel> OnClick { get; set; }
+}

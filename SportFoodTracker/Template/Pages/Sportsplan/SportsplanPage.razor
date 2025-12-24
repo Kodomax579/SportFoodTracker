@@ -2,6 +2,7 @@
 @using SportFoodTracker.Models.Sportsplan
 @using SportFoodTracker.Models.enums
 @using SportFoodTracker.Service
+@using SportFoodTracker.Template.Component
 @inject SportsplanService SportsplanService
 @inject NavigationManager NavigationManager
 
@@ -66,7 +67,7 @@ else
                                         </span>
                                         @day
                                         <small class="text-muted ms-3 fw-normal" style="font-size: 0.8rem;">
-                                            @(ExercisesPerDay[day].Count) Übungen
+                                            @(ExercisesPerDay[day].Count) Exercises
                                         </small>
                                     </h5>
                                     <i class="bi @(isActive ? "bi-chevron-up" : "bi-chevron-down") text-muted"></i>
@@ -82,25 +83,17 @@ else
                                             @foreach (var exercise in ExercisesPerDay[day])
                                             {
                                                 <div class="exercise-row position-relative p-3 mb-3 rounded-3 border shadow-sm bg-white">
-                                                    <div class="row g-3 align-items-center">
-                                                        <div class="col-12 col-lg-6">
-                                                            <label class="form-label small text-muted mb-1">Übung</label>
-                                                            <input type="text" class="form-control border-0 bg-light" @bind="exercise.Description" placeholder="Übungsname..." />
-                                                        </div>
-                                                        <div class="col-6 col-lg-3">
-                                                            <label class="form-label small text-muted mb-1 fw-bold text-primary">Sätze</label>
-                                                            <input type="number" class="form-control" @bind="exercise.Sets" />
-                                                        </div>
-                                                        <div class="col-6 col-lg-3">
-                                                            <label class="form-label small text-muted mb-1 fw-bold text-success">Wdh.</label>
-                                                            <input type="number" class="form-control" @bind="exercise.Repetition" />
-                                                        </div>
-                                                    </div>
-
-                                                    @* Delete-Button immer oben rechts, absolute Position *@
+                                                    @if(!exercise.IsCreated)
+                                                    {
+                                                        <TrainingInputDetailComponent ExerciseData="(args) => OnSaveExercise(args, day)" exercise="exercise"></TrainingInputDetailComponent>
+                                                    }
+                                                    else
+                                                    {
+                                                        <TrainingShowInputComponent exercise="exercise" Onclick="() => OnEditTrainingDetail(exercise)"></TrainingShowInputComponent>
+                                                    }
                                                     <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
                                                             @onclick="() => OnRemoveExercise(day, exercise)"
-                                                            title="Übung löschen">
+                                                            title="Delete exercise">
                                                         <i class="bi bi-trash3-fill">X</i>
                                                     </button>
                                                 </div>
@@ -108,7 +101,7 @@ else
                                         }
                                         <button class="btn btn-outline-primary w-100 py-2 border-dashed mt-2"
                                                 @onclick="() => OnAddExercise(day)">
-                                            <i class="bi bi-plus-lg me-2"></i> Übung zu @day hinzufügen
+                                            <i class="bi bi-plus-lg me-2"></i> Add exercise @day 
                                         </button>
                                     </div>
                                 }
@@ -166,14 +159,24 @@ else
     [Parameter]
     public int? id{ get; set; }
     private Weekday? activeDay;
-    public SportsplanModel? sportsplan;
+    public WorkoutModel? sportsplan;
+    public Dictionary<Weekday,int> IndexForEveryWeekday = new Dictionary<Weekday, int>()
+    {
+        {Weekday.Monday, 0},
+        {Weekday.Tuesday, 0},
+        {Weekday.Wednesday, 0},
+        {Weekday.Thursday, 0},
+        {Weekday.Friday, 0 },
+        {Weekday.Saturday, 0},
+        {Weekday.Sunday, 0}
+    };
 
-    public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
-    .ToDictionary(day => day, day => new List<ExerciseModel>());
 
     bool IsEditMode => id.HasValue;
     public bool isLoading = true;
 
+    public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
+    .ToDictionary(day => day, day => new List<ExerciseModel>());
     /// <summary>
     /// Initializes the component by loading the sports plan if an ID is provided.
     /// </summary>
@@ -188,7 +191,7 @@ else
         }
         else
         {
-            sportsplan = new SportsplanModel();
+            sportsplan = new WorkoutModel();
         }
         isLoading = false;
     }
@@ -199,7 +202,13 @@ else
     /// <param name="weekday"></param>
     public void OnAddExercise(Weekday weekday)
     {
-        ExercisesPerDay[weekday].Add(new ExerciseModel());
+        ExercisesPerDay[weekday].Add(new ExerciseModel() { InternalId = IndexForEveryWeekday[weekday] });
+        IndexForEveryWeekday[weekday]++;
+    }
+
+    public void OnSaveExercise(ExerciseModel exerciseModel, Weekday day)
+    {
+        ExercisesPerDay[day][exerciseModel.InternalId] = exerciseModel;
     }
 
     /// <summary>
@@ -251,7 +260,12 @@ else
                     {
                         Description = e.Description,
                         Repetition = e.Repetition,
-                        Sets = e.Sets
+                        Sets = e.Sets,
+                        Meter = e.Meter,
+                        Time = e.Time,
+                        IsCreated = e.IsCreated,
+                        trainingParameter = e.trainingParameter,
+                        InternalId = e.InternalId
                     })
                     .ToList()
             });
@@ -272,16 +286,7 @@ else
             if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
                 continue;
 
-            training.Exercise = ExercisesPerDay[training.DayOfWeek]
-                .Select(e => new ExerciseModel
-                {
-                    Id = e.Id,
-                    Description = e.Description,
-                    Repetition = e.Repetition,
-                    Sets = e.Sets,
-                    TrainingsplanId = training.Id
-                })
-                .ToList();
+            training.Exercise = ExercisesPerDay[training.DayOfWeek];
         }
     }
 
@@ -308,6 +313,15 @@ else
         {
             ExercisesPerDay[day].Remove(exercise);
         }
+        IndexForEveryWeekday[day]--;
+    }
+
+    /// <summary>
+    /// Set IsCreated to false to open the trainingInputDetailComponent
+    /// </summary>
+    public void OnEditTrainingDetail(ExerciseModel exercise)
+    {
+        exercise.IsCreated = false;
     }
 
     /// <summary>
@@ -337,6 +351,8 @@ else
             if (training.Exercise == null)
                 continue;
 
+            IndexForEveryWeekday[training.DayOfWeek] = training.Exercise.Count;
+
             ExercisesPerDay[training.DayOfWeek] = training.Exercise
                 .Select(e => new ExerciseModel
                 {
@@ -344,7 +360,11 @@ else
                     Description = e.Description,
                     Repetition = e.Repetition,
                     Sets = e.Sets,
-                    TrainingsplanId = e.TrainingsplanId
+                    TrainingsplanId = e.TrainingsplanId,
+                    IsCreated = e.IsCreated,
+                    trainingParameter = e.trainingParameter,
+                    Time = e.Time,
+                    Meter = e.Meter
                 })
                 .ToList();
         }

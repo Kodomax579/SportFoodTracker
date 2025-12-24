@@ -1,0 +1,88 @@
+﻿@page "/sportsplan-overview"
+@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.enums
+@using SportFoodTracker.Service
+@using SportFoodTracker.Template.Component
+@inject SportsplanService SportsplanService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Today</h2>
+            <small class="text-muted">
+                @GetWeekdayFromSystemDay(dateTime.DayOfWeek)
+            </small>
+        </div>
+
+        <button class="btn btn-primary"
+                @onclick="OnAddSportsplan">
+            + Sportsplan
+        </button>
+    </div>
+
+    @if (sportsplans == null)
+    {
+        <div class="text-center text-muted">
+            <div class="spinner-border"></div>
+            <p class="mt-2">Load Sportsplans...</p>
+        </div>
+    }
+    else if (!sportsplans.Any())
+    {
+        <div class="alert alert-info">
+            No Sportsplans found. Please add a new Sportsplan.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var sportsplan in sportsplans)
+            {
+                <SportsplanComponent Dayweek="GetWeekdayFromSystemDay(dateTime.DayOfWeek)" Sportsplan="sportsplan" IsSportsplanDeleted="DeletedSportsplan"></SportsplanComponent>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    public List<WorkoutModel>? sportsplans;
+    public DateTime dateTime;
+
+    /// <summary>
+    /// Initializes the component and loads all sports plans.
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        sportsplans = await SportsplanService.GetAllAsync();
+        dateTime = DateTime.Now;
+    }
+
+    /// <summary>
+    /// Navigates to the page for adding a new sports plan.
+    /// </summary>
+    public void OnAddSportsplan()
+    {
+        NavigationManager.NavigateTo("/sportsplan");
+    }
+
+    /// <summary>
+    /// Refresh data after one deleted plan
+    /// </summary>
+    public async void DeletedSportsplan()
+    {
+        await OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Get Weekday from System DayOfWeek
+    /// </summary>
+    /// <param name="day"></param>
+    /// <returns></returns>
+    Weekday GetWeekdayFromSystemDay(DayOfWeek day)
+      => day == DayOfWeek.Sunday ? Weekday.Sunday : (Weekday)((int)day - 1);
+
+}
