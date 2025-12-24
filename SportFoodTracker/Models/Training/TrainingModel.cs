@@ -16,6 +16,7 @@ namespace SportFoodTracker.Models.Training
         public bool IsDone { get; set; }
         public string? Description{ get; set; }
         public int time { get; set; }
+        public int TrainingsplanId { get; set; }
         [Ignore]
         public List<TrainingSetModel> TrainingSets { get; set; } = new List<TrainingSetModel>();
     }

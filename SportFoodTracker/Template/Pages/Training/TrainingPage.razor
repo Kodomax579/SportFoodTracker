@@ -129,6 +129,7 @@
         TrainingModel trainingModel = new TrainingModel();
         trainingModel.TrainingSets = new List<TrainingSetModel>();
 
+        trainingModel.TrainingsplanId = Id;
         trainingModel.Date = DateTime.Now.Date;
         trainingModel.time = (endTraining - startTraining).Minutes;
         trainingModel.IsDone = true;

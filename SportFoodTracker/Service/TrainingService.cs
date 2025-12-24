@@ -43,12 +43,12 @@ namespace SportFoodTracker.Service
             return trainings;
         }
 
-        public async Task<bool> IsTodayTrainingDoneAsync()
+        public async Task<bool> IsTodayTrainingDoneAsync(int id)
         {
             var today = DateTime.Today;
 
             var trainings = await _trainingDatabase.GetAllTrainingsAsync();
-            var training = trainings.Where(t => t.Date.Date == today)
+            var training = trainings.Where(t => t.Date.Date == today && t.TrainingsplanId == id)
                 .FirstOrDefault();
 
             return training?.IsDone == true;
