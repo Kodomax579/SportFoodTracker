@@ -2,7 +2,7 @@
 
 namespace SportFoodTracker.Models.Sportsplan
 {
-    public class SportsplanModel
+    public class WorkoutModel
     {
         [PrimaryKey]
         [AutoIncrement]

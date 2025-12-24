@@ -17,21 +17,21 @@ namespace SportFoodTracker.Context.Sportplan
             _database = new SQLiteAsyncConnection(SportsPlanDbConstans.DatabasePath, SportsPlanDbConstans.Flags);
             await _database.CreateTableAsync<ExerciseModel>();
             await _database.CreateTableAsync<TrainingsplanModel>();
-            await _database.CreateTableAsync<SportsplanModel>();
+            await _database.CreateTableAsync<WorkoutModel>();
         }
         #region --- Get Lists ---
         /// <summary>
         /// Get all sportplans
         /// </summary>
         /// <returns></returns>
-        public async Task<List<SportsplanModel>> GetAllSportsplansAsync()
+        public async Task<List<WorkoutModel>> GetAllSportsplansAsync()
         {
             await Init();
             if (_database == null)
             {
-                return new List<SportsplanModel>();
+                return new List<WorkoutModel>();
             }
-            var sportsplans = await _database.Table<SportsplanModel>().ToListAsync();
+            var sportsplans = await _database.Table<WorkoutModel>().ToListAsync();
 
             var trainings = await _database.Table<TrainingsplanModel>().ToListAsync();
 
@@ -96,16 +96,16 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<SportsplanModel> GetSportsplanByIdAsync(int id)
+        public async Task<WorkoutModel> GetSportsplanByIdAsync(int id)
         {
             await Init();
 
             if (_database == null)
             {
-                return new SportsplanModel();
+                return new WorkoutModel();
             }
 
-            var sportsplan = await _database.Table<SportsplanModel>()
+            var sportsplan = await _database.Table<WorkoutModel>()
                                              .Where(sp => sp.Id == id)
                                              .FirstOrDefaultAsync();
             if (sportsplan == null)
@@ -175,7 +175,7 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="sportplan"></param>
         /// <returns></returns>
-        public async Task<int> SaveSportplanAsync(SportsplanModel sportplan)
+        public async Task<int> SaveSportplanAsync(WorkoutModel sportplan)
         {
             await Init();
             if (_database == null)
@@ -230,7 +230,7 @@ namespace SportFoodTracker.Context.Sportplan
         /// <param name="sportsplan"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task DeleteSportplanAsync(SportsplanModel sportsplan)
+        public async Task DeleteSportplanAsync(WorkoutModel sportsplan)
         {
             if (sportsplan == null)
                 throw new ArgumentNullException(nameof(sportsplan));

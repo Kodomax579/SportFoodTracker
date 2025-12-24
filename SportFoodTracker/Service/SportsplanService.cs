@@ -10,26 +10,26 @@ namespace SportFoodTracker.Service
 {
     public class SportsplanService
     {
-        private List<SportsplanModel> sportsplans;
-        private SportsplanModel activeSportsplan;
+        private List<WorkoutModel> sportsplans;
+        private WorkoutModel activeSportsplan;
 
         private SportsPlanDatabase _sportsPlanDatabase;
 
         public SportsplanService(SportsPlanDatabase sportsPlanDatabase)
         {
             _sportsPlanDatabase = sportsPlanDatabase;
-            activeSportsplan = new SportsplanModel();
-            sportsplans = new List<SportsplanModel>();
+            activeSportsplan = new WorkoutModel();
+            sportsplans = new List<WorkoutModel>();
         }
 
-        public async Task<List<SportsplanModel>> GetAllAsync()
+        public async Task<List<WorkoutModel>> GetAllAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
             sportsplans = plans;
             return plans;
         }
 
-        public async Task<SportsplanModel> GetActiveSportsplanAsync()
+        public async Task<WorkoutModel> GetActiveSportsplanAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
             activeSportsplan = plans.FirstOrDefault(plan => plan.IsActive)!;
@@ -42,13 +42,13 @@ namespace SportFoodTracker.Service
             return exercises;
         }
 
-        public async Task<SportsplanModel> GetByIdAsync(int id)
+        public async Task<WorkoutModel> GetByIdAsync(int id)
         {
             var plan = await _sportsPlanDatabase.GetSportsplanByIdAsync(id);
             return plan;
         }
 
-        public async Task CreateNewSportsplan(SportsplanModel sportsplan)
+        public async Task CreateNewSportsplan(WorkoutModel sportsplan)
         {
             if(sportsplan == null)
             {
@@ -58,7 +58,7 @@ namespace SportFoodTracker.Service
             
         }
 
-        public async Task UpdateSportsplan(SportsplanModel sportsplan)
+        public async Task UpdateSportsplan(WorkoutModel sportsplan)
         {
             if (sportsplan == null)
             {
@@ -70,7 +70,7 @@ namespace SportFoodTracker.Service
             await _sportsPlanDatabase.SaveSportplanAsync(sportsplan);
         }
 
-        public async Task DeleteSportsplan(SportsplanModel sportsplan)
+        public async Task DeleteSportsplan(WorkoutModel sportsplan)
         {
             if (sportsplan == null)
             {
@@ -79,7 +79,7 @@ namespace SportFoodTracker.Service
             await _sportsPlanDatabase.DeleteSportplanAsync(sportsplan);
         }
 
-        private async Task ResetActiveStatus(SportsplanModel sportsplan)
+        private async Task ResetActiveStatus(WorkoutModel sportsplan)
         {
             foreach(var plan in sportsplans)
             {
