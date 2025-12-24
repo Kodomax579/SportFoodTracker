@@ -17,6 +17,6 @@ namespace SportFoodTracker.Models.Training
         public string? Description{ get; set; }
         public int time { get; set; }
         [Ignore]
-        public List<RepetionsModel> Repetions { get; set; } = new List<RepetionsModel>();
+        public List<TrainingSetModel> TrainingSets { get; set; } = new List<TrainingSetModel>();
     }
 }

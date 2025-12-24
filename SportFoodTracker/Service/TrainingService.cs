@@ -35,7 +35,7 @@ namespace SportFoodTracker.Service
             var exercises = await _sportsplanService.GetAllExerciseAsync();
             foreach (var training in trainings)
             {
-                foreach (var repetion in training.Repetions)
+                foreach (var repetion in training.TrainingSets)
                 {
                     repetion.Exercise = exercises.FirstOrDefault(ex => ex.Id == repetion.ExerciseId)!;
                 }

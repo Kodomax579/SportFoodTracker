@@ -8,16 +8,18 @@ using System.Threading.Tasks;
 
 namespace SportFoodTracker.Models.Training
 {
-    public class RepetionsModel
+    public class TrainingSetModel
     {
         [PrimaryKey]
         [AutoIncrement]
         public int Id { get; set; }
         public int TrainingId { get; set; }
-        [Ignore]
-        public ExerciseModel? Exercise { get; set; }
         public int ExerciseId { get; set; }
         public int Weight { get; set; }
         public int Repetitions { get; set; }
+        public int Meter { get; set; }
+        public double Time { get; set; }
+        [Ignore]
+        public ExerciseModel? Exercise { get; set; }
     }
 }

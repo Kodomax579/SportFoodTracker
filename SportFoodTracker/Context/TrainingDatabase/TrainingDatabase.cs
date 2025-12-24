@@ -22,7 +22,7 @@ namespace SportFoodTracker.Context.TrainingDatabase
                 return;
             _database = new SQLiteAsyncConnection(TrainingDbConstans.DatabasePath, TrainingDbConstans.Flags);
 
-            await _database.CreateTableAsync<RepetionsModel>();
+            await _database.CreateTableAsync<TrainingSetModel>();
             await _database.CreateTableAsync<TrainingModel>();
         }
 
@@ -42,10 +42,10 @@ namespace SportFoodTracker.Context.TrainingDatabase
 
             foreach (var training in trainings)
             {
-                var repetions = await _database.Table<RepetionsModel>()
+                var repetions = await _database.Table<TrainingSetModel>()
                     .Where(r => r.TrainingId == training.Id)
                     .ToListAsync();
-                training.Repetions = repetions;
+                training.TrainingSets = repetions;
             }
             return trainings;
         }
@@ -68,10 +68,10 @@ namespace SportFoodTracker.Context.TrainingDatabase
                 .FirstOrDefaultAsync();
             if (training != null)
             {
-                var repetions = await _database.Table<RepetionsModel>()
+                var repetions = await _database.Table<TrainingSetModel>()
                     .Where(r => r.TrainingId == training.Id)
                     .ToListAsync();
-                training.Repetions = repetions;
+                training.TrainingSets = repetions;
             }
             return training!;
         }
@@ -101,7 +101,7 @@ namespace SportFoodTracker.Context.TrainingDatabase
                 training.Id = await _database.InsertAsync(training);
             }
 
-            foreach (var rep in training.Repetions)
+            foreach (var rep in training.TrainingSets)
             {
                 rep.TrainingId = training.Id;
                 rep.ExerciseId = rep.Exercise!.Id;
