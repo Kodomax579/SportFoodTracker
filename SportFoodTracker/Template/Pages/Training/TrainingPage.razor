@@ -1,4 +1,4 @@
-﻿@page "/training"
+﻿@page "/training/{Id:int?}"
 @using SportFoodTracker.Service
 @using SportFoodTracker.Models.Sportsplan
 @using SportFoodTracker.Models.Training
@@ -81,6 +81,8 @@
 
 
 @code {
+    [Parameter]
+    public int Id { get; set; }
     public TrainingsplanModel? trainingPlan;
     public DateTime startTraining;
     public DateTime endTraining;
@@ -90,9 +92,9 @@
     /// <summary>
     /// Initializes the component and loads today's training plan.
     /// </summary>
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        trainingPlan = sportsplanService.GetTodaysTrainingsPlanAsync(DateTime.Now.DayOfWeek.ToString());
+        trainingPlan = await sportsplanService.GetTrainingByIdAsync(Id);
 
         startTraining = DateTime.Now;
 

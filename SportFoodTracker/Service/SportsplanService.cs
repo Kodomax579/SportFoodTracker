@@ -1,4 +1,5 @@
 ﻿using SportFoodTracker.Context.Sportplan;
+using SportFoodTracker.Models.enums;
 using SportFoodTracker.Models.Sportsplan;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,14 @@ namespace SportFoodTracker.Service
     public class SportsplanService
     {
         private List<WorkoutModel> sportsplans;
-        private WorkoutModel activeSportsplan;
+        private List<WorkoutModel> activeSportsplan;
 
         private SportsPlanDatabase _sportsPlanDatabase;
 
         public SportsplanService(SportsPlanDatabase sportsPlanDatabase)
         {
             _sportsPlanDatabase = sportsPlanDatabase;
-            activeSportsplan = new WorkoutModel();
+            activeSportsplan = new List<WorkoutModel>();
             sportsplans = new List<WorkoutModel>();
         }
 
@@ -29,10 +30,10 @@ namespace SportFoodTracker.Service
             return plans;
         }
 
-        public async Task<WorkoutModel> GetActiveSportsplanAsync()
+        public async Task<List<WorkoutModel>> GetActiveSportsplanAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
-            activeSportsplan = plans.FirstOrDefault(plan => plan.IsActive)!;
+            activeSportsplan = plans.Where(plan => plan.IsActive == true).ToList();
             return activeSportsplan;
         }
 
@@ -42,9 +43,15 @@ namespace SportFoodTracker.Service
             return exercises;
         }
 
-        public async Task<WorkoutModel> GetByIdAsync(int id)
+        public async Task<WorkoutModel> GetWorkoutByIdAsync(int id)
         {
             var plan = await _sportsPlanDatabase.GetSportsplanByIdAsync(id);
+            return plan;
+        }
+
+        public async Task<TrainingsplanModel> GetTrainingByIdAsync(int id)
+        {
+            var plan = await _sportsPlanDatabase.GetTrainingsplanByIdAsync(id);
             return plan;
         }
 
@@ -64,9 +71,7 @@ namespace SportFoodTracker.Service
             {
                 throw new ArgumentNullException(nameof(sportsplan), "Sportsplan cannot be null");
             }
-            await ResetActiveStatus(sportsplan);
-            sportsplan.IsActive = true;
-            activeSportsplan = sportsplan;
+            
             await _sportsPlanDatabase.SaveSportplanAsync(sportsplan);
         }
 
@@ -77,20 +82,6 @@ namespace SportFoodTracker.Service
                 throw new ArgumentNullException(nameof(sportsplan), "Sportsplan cannot be null");
             }
             await _sportsPlanDatabase.DeleteSportplanAsync(sportsplan);
-        }
-
-        private async Task ResetActiveStatus(WorkoutModel sportsplan)
-        {
-            foreach(var plan in sportsplans)
-            {
-                plan.IsActive = false;
-                await _sportsPlanDatabase.SaveSportplanAsync(plan);
-            }
-        }
-
-        public TrainingsplanModel GetTodaysTrainingsPlanAsync(string DayOfWeek)
-        {
-            return activeSportsplan.Trainingsplan.FirstOrDefault(tp => tp.DayOfWeek.ToString() == DayOfWeek)!;
         }
     }
 }

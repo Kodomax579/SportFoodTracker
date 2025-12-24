@@ -185,7 +185,7 @@ else
     {
         if(id.HasValue)
         {
-            sportsplan = await SportsplanService.GetByIdAsync(id.Value);
+            sportsplan = await SportsplanService.GetWorkoutByIdAsync(id.Value);
 
             MapTrainingsplanToExervicesPerDay();
         }

@@ -45,65 +45,73 @@
             </div>
         </div>
     </div>
+    @if(sportsplan == null)
+    {
+        <p>dfas</p>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-4">
 
-    <div class="card shadow-sm mb-4">
-
-        <!-- Header -->
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Todays Training</h5>
-            <button class="btn btn-sm @(isTrainingDoneToday ? "btn-success" : "btn-outline-light")"
-                    disabled="@isTrainingDoneToday"
-                    @onclick="StartTraining">
-                @(isTrainingDoneToday ? "✔ Training Done" : "Start")
-            </button>
-        </div>
-
-        <div class="card-body p-0">
-
-            @if (sportsplan == null)
+            <!-- Header -->
+            @foreach(var workout in sportsplan)
             {
-                <div class="alert alert-info m-3 text-center">
-                    No trainingsplan found or active
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Todays Training</h5>
+                    <button class="btn btn-sm @(isTrainingDoneToday ? "btn-success" : "btn-outline-light")"
+                            disabled="@isTrainingDoneToday"
+                            @onclick="StartTraining">
+                        @(isTrainingDoneToday ? "✔ Training Done" : "Start")
+                    </button>
                 </div>
-            }
-            else
-            {
-                var todayTraining = GetTodayTrainingsplan();
 
-                <div class="px-3 pt-3">
-                    <h4 class="fw-bold mb-1">@sportsplan.Description</h4>
-                    <small class="text-muted">Heutiges Training</small>
-                </div>
-                <hr />
-                @if (todayTraining?.Exercise?.Any() == true)
-                {
-                    <ul class="list-group list-group-flush mt-3">
-                        @foreach (var exercise in todayTraining.Exercise)
+                <div class="card-body p-0">
+
+                    @if (sportsplan == null)
+                    {
+                        <div class="alert alert-info m-3 text-center">
+                            No trainingsplan found or active
+                        </div>
+                    }
+                    else
+                    {
+                        var training = GetTrainingModel(workout.Trainingsplan);
+                        <div class="px-3 pt-3">
+                            <h4 class="fw-bold mb-1">@workout.Description</h4>
+                            <small class="text-muted">Heutiges Training</small>
+                        </div>
+                        <hr />
+                        @if (training?.Exercise?.Any() == true)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="fw-medium">@exercise.Description</span>
-                                <span class="badge bg-secondary rounded-pill">
-                                    @exercise.Repetition ×
-                                </span>
-                            </li>
+                            <ul class="list-group list-group-flush mt-3">
+                                @foreach (var exercise in training.Exercise)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="fw-medium">@exercise.Description</span>
+                                        <span class="badge bg-secondary rounded-pill">
+                                            @exercise.Repetition ×
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
                         }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted text-center py-4 mb-0">
-                        🛌 Heute ist Ruhetag
-                    </p>
-                }
+                        else
+                        {
+                            <p class="text-muted text-center py-4 mb-0">
+                                🛌 Restday
+                            </p>
+                        }
+                    
+                    }
+                </div>
             }
-
         </div>
-    </div>
+    }
 
 </div>
 
 @code {
-    public WorkoutModel? sportsplan;
+    public List<WorkoutModel>? sportsplan;
     public TrainingModel? trainingModel;
     public bool isTrainingDoneToday;
 
@@ -125,19 +133,9 @@
         NavigationManager.NavigateTo("/sportsplan-overview");
     }
 
-    /// <summary>
-    /// get todays trainings plan
-    /// </summary>
-    /// <returns></returns>
-    public TrainingsplanModel GetTodayTrainingsplan()
+    public TrainingsplanModel GetTrainingModel(List<TrainingsplanModel> trainingsplanModels)
     {
-        if (sportsplan == null || sportsplan.Trainingsplan == null)
-        {
-            return null!;
-        }
-        var today = DateTime.Today.DayOfWeek;
-        return sportsplan.Trainingsplan
-            .FirstOrDefault(tp => tp.DayOfWeek.ToString() == today.ToString()) ?? new TrainingsplanModel();
+        return trainingsplanModels.FirstOrDefault(tp => tp.DayOfWeek.ToString() == DateTime.Now.DayOfWeek.ToString())!;
     }
 
     /// <summary>
