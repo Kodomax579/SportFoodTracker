@@ -18,8 +18,14 @@ namespace SportFoodTracker.Models.Training
         public int Weight { get; set; }
         public int Repetitions { get; set; }
         public int Meter { get; set; }
-        public double Time { get; set; }
+        public int TimeInSeconds { get; set; }
         [Ignore]
         public ExerciseModel? Exercise { get; set; }
+        [Ignore]
+        public TimeOnly Time
+        {
+            get => TimeOnly.FromTimeSpan(TimeSpan.FromSeconds(TimeInSeconds));
+            set => TimeInSeconds = (int)value.ToTimeSpan().TotalSeconds;
+        }
     }
 }

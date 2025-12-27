@@ -14,9 +14,16 @@ namespace SportFoodTracker.Models.Sportsplan
         [AutoIncrement]
         public int Id { get; set; }
         public Weekday DayOfWeek { get; set; }
+        public int PauseInSeconds { get; set; }
+        public int SportsplanId { get; set; }
+
         [Ignore]
         public List<ExerciseModel> Exercise { get; set; } = new List<ExerciseModel>();
-
-        public int SportsplanId { get; set; }
+        [Ignore]
+        public TimeOnly pause
+        {
+            get => TimeOnly.FromTimeSpan(TimeSpan.FromSeconds(PauseInSeconds));
+            set => PauseInSeconds = (int)value.ToTimeSpan().TotalSeconds;
+        }
     }
 }
