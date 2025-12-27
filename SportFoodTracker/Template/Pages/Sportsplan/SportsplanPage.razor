@@ -3,6 +3,7 @@
 @using SportFoodTracker.Models.enums
 @using SportFoodTracker.Service
 @using SportFoodTracker.Template.Component.Trainingsplan
+@using System.Globalization;
 @inject SportsplanService SportsplanService
 @inject NavigationManager NavigationManager
 
@@ -24,23 +25,23 @@ else
                 <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
                     <h2 class="fw-bold text-dark mb-0">
                         <i class="bi bi-calendar-event me-2"></i>
-                        @(id.HasValue ? "Sportplan bearbeiten" : "Neuen Sportplan anlegen")
+                        @(id.HasValue ? "Edit plan" : "Create new plan")
                     </h2>
                     <button class="btn btn-primary shadow-sm" @onclick="OnSubmit">
-                        <i class="bi bi-check-lg"></i> Speichern
+                        <i class="bi bi-check-lg"></i> Save
                     </button>
                 </div>
 
-                @* Allgemeine Infos *@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body bg-light rounded">
-                        <label class="form-label fw-semibold">Name des Plans</label>
+                        <label class="form-label fw-semibold">plan name</label>
                         <input type="text" class="form-control form-control-lg border-0 shadow-sm"
-                               placeholder="z.B. Ganzkörper Krafttraining" @bind="sportsplan!.Description" />
+                               placeholder="e.g. calisthenics plan" @bind="sportsplan!.Description" />
+                        <label class="form-label fw-semibold">pause</label>
+                        <input type="text" placeholder="mm:ss" @bind="DurationText" />
                     </div>
                 </div>
 
-                @* Tage Iteration *@
                 <div class="row g-4">
                     @{
                         // Logik-Mapping für die Anzeige
@@ -159,6 +160,7 @@ else
     [Parameter]
     public int? id{ get; set; }
     private Weekday? activeDay;
+    public TimeOnly pause;
     public WorkoutModel? sportsplan;
     public Dictionary<Weekday,int> IndexForEveryWeekday = new Dictionary<Weekday, int>()
     {
@@ -174,6 +176,12 @@ else
 
     bool IsEditMode => id.HasValue;
     public bool isLoading = true;
+    private string DurationText = "01:00";
+
+    private TimeSpan Duration =>
+        TimeSpan.ParseExact(DurationText, @"mm\:ss", CultureInfo.InvariantCulture);
+
+
 
     public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
     .ToDictionary(day => day, day => new List<ExerciseModel>());
@@ -245,15 +253,17 @@ else
     private void BuildNewSportsplan()
     {
         if (sportsplan == null)
-        {
             return;
-        }
+
         sportsplan.Trainingsplan = new List<TrainingsplanModel>();
+
+        var pauseTime = TimeOnly.FromTimeSpan(Duration);
 
         foreach (Weekday day in Enum.GetValues<Weekday>())
         {
             sportsplan.Trainingsplan.Add(new TrainingsplanModel
             {
+                pause = pauseTime,
                 DayOfWeek = day,
                 Exercise = ExercisesPerDay[day]
                     .Select(e => new ExerciseModel
@@ -271,6 +281,7 @@ else
             });
         }
     }
+
 
     /// <summary>
     /// Update existing sportplan object
