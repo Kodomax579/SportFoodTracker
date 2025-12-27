@@ -24,56 +24,19 @@
     }
     else
     {
-        @foreach (var exercise in exerciseRepetitions)
+        @if (trainingPlan != null && Index < trainingPlan.Exercise.Count)
         {
-            <div class="card shadow-sm mb-4">
-                <!-- Exercise Header -->
+            var nextExercise = GetNextExerciseFromIndex();
+            if (nextExercise != null)
+            {
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">@exercise.Key.Description</h4>
+                    <h4 class="mb-0">@nextExercise.Description</h4>
                 </div>
-
-                <div class="card-body">
-                    @foreach(var repetition in exercise.Value)
-                    {
-                        <div class="border rounded p-3 mb-3 bg-light">
-
-                            <!-- Set Header -->
-                            <h6 class="fw-semibold mb-3">
-                                Set @(exercise.Value.IndexOf(repetition) + 1)
-                                <span class="text-muted small">
-                                    (Ziel: @exercise.Key.Repetition Repetitions)
-                                </span>
-                            </h6>
-
-                            <!-- Inputs -->
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <label class="form-label small text-muted">
-                                        Repetitions
-                                    </label>
-                                    <input type="number"
-                                           class="form-control"
-                                           placeholder="z. B. 10"
-                                           @bind="repetition.Weight" />
-                                </div>
-
-                                <div class="col-6">
-                                    <label class="form-label small text-muted">
-                                        Weight (kg)
-                                    </label>
-                                    <input type="number"
-                                           class="form-control"
-                                           placeholder="z. B. 40"
-                                           @bind="repetition.Repetitions" />
-                                </div>
-                            </div>
-
-                        </div>
-                    }
-                </div>
-            </div>
+                <TrainingExerciseComponent ExerciseModel="nextExercise" OnExerciseDone="ExerciseDone" RestTime="trainingPlan.pause"></TrainingExerciseComponent>
+            }
         }
     }
+    
     <button @onclick="EndTraining">
         End Training
     </button>
@@ -85,38 +48,47 @@
     [Parameter]
     public int Id { get; set; }
     public TrainingsplanModel? trainingPlan;
+    public TrainingModel training = new();
     public DateTime startTraining;
     public DateTime endTraining;
-
-    public Dictionary<ExerciseModel, List<TrainingSetModel>> exerciseRepetitions = new();
+    public int Index = 0;
 
     /// <summary>
     /// Initializes the component and loads today's training plan.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
-        trainingPlan = await sportsplanService.GetTrainingByIdAsync(Id);
+        trainingPlan = await sportsplanService.GetTrainingsplanByIdAsync(Id);
 
         startTraining = DateTime.Now;
+    }
 
-        exerciseRepetitions.Clear();
-
-        foreach (var exercise in trainingPlan.Exercise)
+    public ExerciseModel? GetNextExerciseFromIndex()
+    {
+        if (trainingPlan == null || Index >= trainingPlan.Exercise.Count)
         {
-            var reps = new List<TrainingSetModel>();
-
-            for (int i = 0; i < exercise.Sets; i++)
-            {
-                reps.Add(new TrainingSetModel
-                {
-                    Repetitions = 0,
-                    Weight = 0,
-                    Exercise = exercise
-                });
-            }
-
-            exerciseRepetitions[exercise] = reps;
+            _ = EndTraining(); // Don't wait for response
+            return null;
         }
+        return trainingPlan.Exercise[Index];
+    }
+
+
+    public async Task IncrementIndex()
+    {
+        Index++;
+        if (Index >= trainingPlan?.Exercise.Count)
+        {
+            await EndTraining();
+            return;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task ExerciseDone(TrainingModel trainingModel)
+    {
+        training = trainingModel;
+        await IncrementIndex();
     }
 
     /// <summary>
@@ -126,26 +98,12 @@
     public async Task EndTraining()
     {
         endTraining = DateTime.Now;
-
-        TrainingModel trainingModel = new TrainingModel();
-        trainingModel.TrainingSets = new List<TrainingSetModel>();
-
-        trainingModel.TrainingsplanId = Id;
-        trainingModel.Date = DateTime.Now.Date;
-        trainingModel.time = (endTraining - startTraining).Minutes;
-        trainingModel.IsDone = true;
-        foreach (var exercise in trainingPlan!.Exercise)
-        {
-            foreach (var rep in exerciseRepetitions[exercise])
-            {
-                rep.Exercise = exercise;
-                trainingModel.TrainingSets.Add(rep);
-            }
-        }
-
-        await trainingService.SaveTrainingAsync(trainingModel);
+        training.IsDone = true;
+        training.time = (endTraining - startTraining).Minutes;
+        training.Date = DateTime.Now.Date;
+       
+        await trainingService.SaveTrainingAsync(training);
 
         NavigationManager.NavigateTo("/");
     }
-
 }
