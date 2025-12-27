@@ -1,0 +1,45 @@
+﻿<div class="text-center">
+    <h1 class="mb-3">@DisplayTime</h1>
+</div>
+
+@code {
+    [Parameter]
+    public TimeOnly Time { get; set; }
+    [Parameter]
+    public EventCallback OnStopped { get; set; }
+
+    private int remainingSeconds;
+    private System.Timers.Timer? timer;
+    private bool isRunning;
+
+    protected override void OnParametersSet()
+    {
+        remainingSeconds = (int)Time.ToTimeSpan().TotalSeconds;
+        timer?.Dispose();
+        StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        timer?.Dispose();
+
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += async (_, _) =>
+        {
+            remainingSeconds--;
+
+            if (remainingSeconds <= 0)
+            {
+                timer.Stop();
+                await InvokeAsync(() => OnStopped.InvokeAsync());
+            }
+
+            await InvokeAsync(StateHasChanged);
+        };
+        timer.Start();
+    }
+
+
+    private string DisplayTime =>
+        TimeSpan.FromSeconds(remainingSeconds).ToString(@"mm\:ss");
+}

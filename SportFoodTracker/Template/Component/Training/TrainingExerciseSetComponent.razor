@@ -1,0 +1,57 @@
+﻿@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.Training
+@using SportFoodTracker.Models.enums
+
+@if(exercise == null)
+{
+    <div>
+        load Items
+    </div>
+}
+else
+{
+    <div>
+        <h1>Set: @SetsCounter</h1>
+        <div>
+            @switch (exercise.trainingParameter)
+            {
+                case TrainingParameter.Repetition:
+                    <label>@exercise.Description (Goal: @exercise.Repetition)</label>
+                    <input type="number" placeholder="Repetions:" @bind="trainingSetModel.Repetitions" />
+                    <label>Weight (kg)</label>
+                    <input type="number" placeholder="Repetions:" @bind="trainingSetModel.Weight" />
+                    break;
+                case TrainingParameter.Meter:
+                    <label>@exercise.Description (Goal: @exercise.Meter</label>
+                    <input type="number" placeholder="Meter:" @bind="trainingSetModel.Meter"/>
+                    break;
+                case TrainingParameter.Time:
+                    <TrainingTimer time="exercise.Time" OnStopped="OnStopped"></TrainingTimer>
+                    break;
+            }
+        </div>
+    </div>
+}
+
+<button @onclick="OnSetDone">
+    Set Done
+</button>
+@code {
+    [Parameter]
+    public ExerciseModel? exercise { get; set; }
+    [Parameter]
+    public int SetsCounter { get; set; }
+    [Parameter]
+    public EventCallback<TrainingSetModel> SetDone { get; set; }
+    public TrainingSetModel trainingSetModel = new();
+
+    public void OnStopped(TimeSpan time)
+    {
+        trainingSetModel.TimeInSeconds = (int)time.TotalSeconds;
+        OnSetDone();
+    }
+    public void OnSetDone()
+    {
+        SetDone.InvokeAsync(trainingSetModel);
+    }
+}

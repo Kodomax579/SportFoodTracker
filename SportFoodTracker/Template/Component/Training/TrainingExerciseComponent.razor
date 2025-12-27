@@ -1,0 +1,56 @@
+﻿@using SportFoodTracker.Models.enums
+@using SportFoodTracker.Models.Sportsplan
+@using SportFoodTracker.Models.Training
+
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-body">
+        @if(!isRest)
+        {
+            <TrainingExerciseSetComponent exercise="exerciseModel" SetsCounter="setIndex" SetDone="SetDone"></TrainingExerciseSetComponent>
+        }
+        else
+        {
+            <TrainingPauseTimerComponent Time="RestTime" OnStopped="NextSet"></TrainingPauseTimerComponent>
+        }
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ExerciseModel? exerciseModel { get; set; }
+    [Parameter]
+    public TimeOnly RestTime { get; set; }
+    [Parameter]
+    public EventCallback<TrainingModel> OnExerciseDone { get; set; }
+
+
+    private int setIndex = 1;
+    private TrainingModel trainingModel = new();
+    public bool isRest = false;
+    public async Task SetDone(TrainingSetModel trainingSetModel)
+    {
+        trainingSetModel.Exercise = exerciseModel;
+        trainingModel.TrainingSets.Add(trainingSetModel);
+
+        setIndex++;
+        if (setIndex > exerciseModel!.Sets)
+        {
+            trainingModel.Date = DateTime.Now;
+            trainingModel.Description = exerciseModel.Description;
+            await OnExerciseDone.InvokeAsync(trainingModel);
+        }
+        else
+        {
+            isRest = true;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task NextSet()
+    {
+        isRest = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

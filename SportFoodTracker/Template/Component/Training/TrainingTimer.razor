@@ -1,0 +1,73 @@
+﻿<div class="text-center">
+    <h1 class="mb-3">@DisplayTime</h1>
+
+    <div class="d-flex justify-content-center gap-2">
+        <button class="btn btn-primary"
+                @onclick="Start"
+                disabled="@isRunning">
+            ▶ Start
+        </button>
+
+        <button class="btn btn-warning"
+                @onclick="Stop"
+                disabled="@(!isRunning)">
+            ⏸ Pause
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public TimeOnly Time { get; set; }
+    [Parameter]
+    public EventCallback<TimeSpan> OnStopped { get; set; }
+
+    private DateTime startTime;
+    private DateTime endTime;
+    private TimeSpan duration;
+    private int remainingSeconds;
+    private System.Timers.Timer? timer;
+    private bool isRunning;
+
+    protected override void OnParametersSet()
+    {
+        remainingSeconds = (int)Time.ToTimeSpan().TotalSeconds;
+        isRunning = false;
+        timer?.Dispose();
+    }
+
+    private void Start()
+    {
+        startTime = DateTime.Now;
+        remainingSeconds = (int)Time.ToTimeSpan().TotalSeconds;
+        StartTimer();
+    }
+
+    private void Stop()
+    {
+        timer?.Stop();
+        isRunning = false;
+        endTime = DateTime.Now;
+        duration = endTime - startTime;
+        OnStopped.InvokeAsync(duration);
+    }
+
+    private void StartTimer()
+    {
+        timer?.Dispose();
+
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (_, _) =>
+        {
+            isRunning = false;
+            remainingSeconds--;
+            InvokeAsync(StateHasChanged);
+        };
+
+        isRunning = true;
+        timer.Start();
+    }
+
+    private string DisplayTime =>
+        TimeSpan.FromSeconds(remainingSeconds).ToString(@"mm\:ss");
+}
