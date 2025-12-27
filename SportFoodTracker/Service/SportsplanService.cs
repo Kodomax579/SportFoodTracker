@@ -49,7 +49,7 @@ namespace SportFoodTracker.Service
             return plan;
         }
 
-        public async Task<TrainingsplanModel> GetTrainingByIdAsync(int id)
+        public async Task<TrainingsplanModel> GetTrainingsplanByIdAsync(int id)
         {
             var plan = await _sportsPlanDatabase.GetTrainingsplanByIdAsync(id);
             return plan;
