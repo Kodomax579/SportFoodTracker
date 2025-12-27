@@ -94,9 +94,18 @@
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span class="fw-medium">@exercise.Description</span>
-                                        <span class="badge bg-secondary rounded-pill">
-                                            @exercise.Repetition ×
-                                        </span>
+                                        @switch (exercise.trainingParameter)
+                                        {
+                                            case TrainingParameter.Repetition:
+                                                <span class="badge bg-secondary rounded-pill">@exercise.Sets x @exercise.Repetition x</span>
+                                                break;
+                                            case TrainingParameter.Meter:
+                                                <span class="badge bg-secondary rounded-pill">@exercise.Sets x @exercise.Meter m</span>
+                                                break;
+                                            case TrainingParameter.Time:
+                                                <span class="badge bg-secondary rounded-pill">@exercise.Sets x @exercise.Time</span>
+                                                break;
+                                        }
                                     </li>
                                 }
                             </ul>
