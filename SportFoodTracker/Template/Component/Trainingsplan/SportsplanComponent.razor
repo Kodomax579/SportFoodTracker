@@ -33,7 +33,7 @@
 
             <!-- Today's Training -->
             @{
-                var todayTraining = Sportsplan.Trainingsplan?.FirstOrDefault(t => t.DayOfWeek == Dayweek);
+                var todayTraining = Sportsplan.WorkoutSessions?.FirstOrDefault(t => t.DayOfWeek == Dayweek);
             }
 
             @if (todayTraining?.Exercise?.Any() == true)

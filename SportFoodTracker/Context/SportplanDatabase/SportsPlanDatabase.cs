@@ -39,14 +39,14 @@ namespace SportFoodTracker.Context.Sportplan
 
                 foreach (var sp in sportsplans)
                 {
-                    var spTrainings = trainings.Where(tp => tp.SportsplanId == sp.Id).ToList();
+                    var spTrainings = trainings.Where(tp => tp.TrainingProgramId == sp.Id).ToList();
 
                     foreach (var tp in spTrainings)
                     {
-                        tp.Exercise = exercises.Where(ex => ex.TrainingsplanId == tp.Id).ToList();
+                        tp.Exercise = exercises.Where(ex => ex.WorkoutSessionId == tp.Id).ToList();
                     }
 
-                    sp.Trainingsplan = spTrainings;
+                    sp.WorkoutSessions = spTrainings;
                 }
 
             return sportsplans;
@@ -69,7 +69,7 @@ namespace SportFoodTracker.Context.Sportplan
 
             foreach (var tp in trainings)
             {
-                tp.Exercise = exercises.Where(ex => ex.TrainingsplanId == tp.Id).ToList();
+                tp.Exercise = exercises.Where(ex => ex.WorkoutSessionId == tp.Id).ToList();
             }
 
             return trainings;
@@ -112,7 +112,7 @@ namespace SportFoodTracker.Context.Sportplan
                 return null!;
 
             var trainings = await _database.Table<WorkoutSessionModel>()
-                                           .Where(tp => tp.SportsplanId == id)
+                                           .Where(tp => tp.TrainingProgramId == id)
                                            .ToListAsync();
 
             var exercises = await _database.Table<ExerciseEntryModel>()
@@ -120,10 +120,10 @@ namespace SportFoodTracker.Context.Sportplan
 
             foreach (var tp in trainings)
             {
-                tp.Exercise = exercises.Where(ex => ex.TrainingsplanId == tp.Id).ToList();
+                tp.Exercise = exercises.Where(ex => ex.WorkoutSessionId == tp.Id).ToList();
             }
 
-            sportsplan.Trainingsplan = trainings;
+            sportsplan.WorkoutSessions = trainings;
             return sportsplan;
         }
 
@@ -148,7 +148,7 @@ namespace SportFoodTracker.Context.Sportplan
                 return null!;
 
             tp.Exercise = await _database.Table<ExerciseEntryModel>()
-                                         .Where(ex => ex.TrainingsplanId == tp.Id)
+                                         .Where(ex => ex.WorkoutSessionId == tp.Id)
                                          .ToListAsync();
             return tp;
         }
@@ -191,12 +191,12 @@ namespace SportFoodTracker.Context.Sportplan
                     conn.Update(sportplan);
 
                 // Trainingspläne
-                if (sportplan.Trainingsplan == null)
+                if (sportplan.WorkoutSessions == null)
                     return;
 
-                foreach (var training in sportplan.Trainingsplan)
+                foreach (var training in sportplan.WorkoutSessions)
                 {
-                    training.SportsplanId = sportplan.Id;
+                    training.TrainingProgramId = sportplan.Id;
 
                     if (training.Id == 0)
                         conn.Insert(training);
@@ -209,7 +209,7 @@ namespace SportFoodTracker.Context.Sportplan
 
                     foreach (var exercise in training.Exercise)
                     {
-                        exercise.TrainingsplanId = training.Id;
+                        exercise.WorkoutSessionId = training.Id;
 
                         if (exercise.Id == 0)
                             conn.Insert(exercise);
