@@ -18,7 +18,7 @@
 
 @code {
     [Parameter]
-    public TimeOnly Time { get; set; }
+    public int TimeInSeconds { get; set; }
     [Parameter]
     public EventCallback<TimeSpan> OnStopped { get; set; }
 
@@ -31,7 +31,7 @@
 
     protected override void OnParametersSet()
     {
-        remainingSeconds = (int)Time.ToTimeSpan().TotalSeconds;
+        remainingSeconds = TimeInSeconds;
         isRunning = false;
         timer?.Dispose();
     }
@@ -39,7 +39,7 @@
     private void Start()
     {
         startTime = DateTime.Now;
-        remainingSeconds = (int)Time.ToTimeSpan().TotalSeconds;
+        remainingSeconds = TimeInSeconds;
         StartTimer();
     }
 

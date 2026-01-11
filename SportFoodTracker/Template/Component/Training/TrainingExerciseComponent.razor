@@ -12,15 +12,13 @@
         }
         else
         {
-            <TrainingPauseTimerComponent Time="RestTime" OnStopped="NextSet"></TrainingPauseTimerComponent>
+            <TrainingPauseTimerComponent TimeInSeconds="exerciseModel.TimeInSeconds" OnStopped="NextSet"></TrainingPauseTimerComponent>
         }
     </div>
 </div>
 @code {
     [Parameter]
     public ExerciseEntryModel? exerciseModel { get; set; }
-    [Parameter]
-    public TimeOnly RestTime { get; set; }
     [Parameter]
     public EventCallback<TrainingModel> OnExerciseDone { get; set; }
 

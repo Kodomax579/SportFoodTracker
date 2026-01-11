@@ -28,5 +28,12 @@ namespace SportFoodTracker.Models.Sportsplan
         public int PauseInSeconds { get; set; }
 
         public TrainingParameter trainingParameter { get; set; }
+
+        [Ignore]
+        public TimeSpan PauseTimeSpan
+        {
+            get => TimeSpan.FromSeconds(PauseInSeconds);
+            set => PauseInSeconds = (int)value.TotalSeconds;
+        }
     }
 }

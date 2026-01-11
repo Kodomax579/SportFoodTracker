@@ -26,7 +26,7 @@ else
                     <input type="number" placeholder="Meter:" @bind="trainingSetModel.Meter"/>
                     break;
                 case TrainingParameter.Time:
-                    <TrainingTimer time="exercise.Time" OnStopped="OnStopped"></TrainingTimer>
+                    <TrainingTimer TimeInSeconds="exercise.TimeInSeconds" OnStopped="OnStopped"></TrainingTimer>
                     break;
             }
         </div>

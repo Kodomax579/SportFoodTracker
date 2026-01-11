@@ -78,9 +78,28 @@
                         <label class="form-label fw-bold text-success">
                             Time
                         </label>
-                        <input type="time"
-                               class="form-control form-control-lg text-center"
-                               @bind="exercise.Time" />
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Pause</span>
+
+                            <input type="number"
+                                   class="form-control text-center"
+                                   placeholder="Min"
+                                   min="0"
+                                   max="59"
+                                   @bind="PauseMinutes" />
+
+                            <span class="input-group-text">:</span>
+
+                            <input type="number"
+                                   class="form-control text-center"
+                                   placeholder="Sek"
+                                   min="0"
+                                   max="59"
+                                   step="5"
+                                   @bind="PauseSeconds" />
+                        </div>
+
+                        <small class="text-muted">Gespeichert: @exercise.PauseInSeconds Sekunden</small>
                         break;
                 }
             </div>
@@ -115,6 +134,27 @@
     public EventCallback<ExerciseEntryModel> ExerciseData { get; set; }
 
     public TrainingParameter trainingParameter;
+
+   
+    public int PauseMinutes
+    {
+        get => exercise.PauseInSeconds / 60;
+        set
+        {
+            var currentSeconds = exercise.PauseInSeconds % 60;
+            exercise.PauseInSeconds = (value * 60) + currentSeconds;
+        }
+    }
+
+    public int PauseSeconds
+    {
+        get => exercise.PauseInSeconds % 60;
+        set
+        {
+            var currentMinutes = exercise.PauseInSeconds / 60;
+            exercise.PauseInSeconds = (currentMinutes * 60) + value;
+        }
+    }
 
     public void OnAddExercise()
     {

@@ -178,8 +178,8 @@ else
     public bool isLoading = true;
     private string DurationText = "01:00";
 
-    private TimeSpan Duration =>
-        TimeSpan.ParseExact(DurationText, @"mm\:ss", CultureInfo.InvariantCulture);
+    private int Duration =>
+        TimeSpan.ParseExact(DurationText, @"mm\:ss", CultureInfo.InvariantCulture).Seconds;
 
 
 
@@ -257,13 +257,10 @@ else
 
         sportsplan.WorkoutSessions = new List<WorkoutSessionModel>();
 
-        var pauseTime = TimeOnly.FromTimeSpan(Duration);
-
         foreach (Weekday day in Enum.GetValues<Weekday>())
         {
             sportsplan.WorkoutSessions.Add(new WorkoutSessionModel
             {
-                pause = pauseTime,
                 DayOfWeek = day,
                 Exercise = ExercisesPerDay[day]
                     .Select(e => new ExerciseEntryModel
@@ -272,7 +269,7 @@ else
                         Repetition = e.Repetition,
                         Sets = e.Sets,
                         Meter = e.Meter,
-                        Time = e.Time,
+                        PauseInSeconds = Duration,
                         IsCreated = e.IsCreated,
                         trainingParameter = e.trainingParameter,
                         InternalId = e.InternalId
@@ -374,7 +371,7 @@ else
                     WorkoutSessionId = e.WorkoutSessionId,
                     IsCreated = e.IsCreated,
                     trainingParameter = e.trainingParameter,
-                    Time = e.Time,
+                    TimeInSeconds = e.TimeInSeconds,
                     Meter = e.Meter
                 })
                 .ToList();
