@@ -2,7 +2,7 @@
 
 namespace SportFoodTracker.Models.Sportsplan
 {
-    public class WorkoutModel
+    public class TrainingProgramModel
     {
         [PrimaryKey]
         [AutoIncrement]
@@ -10,6 +10,6 @@ namespace SportFoodTracker.Models.Sportsplan
         public bool IsActive { get; set; }
         public string? Description { get; set; }
         [Ignore]
-        public List<TrainingsplanModel> Trainingsplan{ get; set; } = new List<TrainingsplanModel>();
+        public List<WorkoutSessionModel> WorkoutSessions { get; set; } = new List<WorkoutSessionModel>();
     }
 }

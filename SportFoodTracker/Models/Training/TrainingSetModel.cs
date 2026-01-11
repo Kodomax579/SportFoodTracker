@@ -20,7 +20,7 @@ namespace SportFoodTracker.Models.Training
         public int Meter { get; set; }
         public int TimeInSeconds { get; set; }
         [Ignore]
-        public ExerciseModel? Exercise { get; set; }
+        public ExerciseEntryModel? Exercise { get; set; }
         [Ignore]
         public TimeOnly Time
         {

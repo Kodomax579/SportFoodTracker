@@ -11,51 +11,51 @@ namespace SportFoodTracker.Service
 {
     public class SportsplanService
     {
-        private List<WorkoutModel> sportsplans;
-        private List<WorkoutModel> activeSportsplan;
+        private List<TrainingProgramModel> sportsplans;
+        private List<TrainingProgramModel> activeSportsplan;
 
         private SportsPlanDatabase _sportsPlanDatabase;
 
         public SportsplanService(SportsPlanDatabase sportsPlanDatabase)
         {
             _sportsPlanDatabase = sportsPlanDatabase;
-            activeSportsplan = new List<WorkoutModel>();
-            sportsplans = new List<WorkoutModel>();
+            activeSportsplan = new List<TrainingProgramModel>();
+            sportsplans = new List<TrainingProgramModel>();
         }
 
-        public async Task<List<WorkoutModel>> GetAllAsync()
+        public async Task<List<TrainingProgramModel>> GetAllAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
             sportsplans = plans;
             return plans;
         }
 
-        public async Task<List<WorkoutModel>> GetActiveSportsplanAsync()
+        public async Task<List<TrainingProgramModel>> GetActiveSportsplanAsync()
         {
             var plans = await _sportsPlanDatabase.GetAllSportsplansAsync();
             activeSportsplan = plans.Where(plan => plan.IsActive == true).ToList();
             return activeSportsplan;
         }
 
-        public async Task<List<ExerciseModel>> GetAllExerciseAsync()
+        public async Task<List<ExerciseEntryModel>> GetAllExerciseAsync()
         {
             var exercises = await _sportsPlanDatabase.GetAllExercisesAsync();
             return exercises;
         }
 
-        public async Task<WorkoutModel> GetWorkoutByIdAsync(int id)
+        public async Task<TrainingProgramModel> GetWorkoutByIdAsync(int id)
         {
             var plan = await _sportsPlanDatabase.GetSportsplanByIdAsync(id);
             return plan;
         }
 
-        public async Task<TrainingsplanModel> GetTrainingsplanByIdAsync(int id)
+        public async Task<WorkoutSessionModel> GetTrainingsplanByIdAsync(int id)
         {
             var plan = await _sportsPlanDatabase.GetTrainingsplanByIdAsync(id);
             return plan;
         }
 
-        public async Task CreateNewSportsplan(WorkoutModel sportsplan)
+        public async Task CreateNewSportsplan(TrainingProgramModel sportsplan)
         {
             if(sportsplan == null)
             {
@@ -65,7 +65,7 @@ namespace SportFoodTracker.Service
             
         }
 
-        public async Task UpdateSportsplan(WorkoutModel sportsplan)
+        public async Task UpdateSportsplan(TrainingProgramModel sportsplan)
         {
             if (sportsplan == null)
             {
@@ -75,7 +75,7 @@ namespace SportFoodTracker.Service
             await _sportsPlanDatabase.SaveSportplanAsync(sportsplan);
         }
 
-        public async Task DeleteSportsplan(WorkoutModel sportsplan)
+        public async Task DeleteSportsplan(TrainingProgramModel sportsplan)
         {
             if (sportsplan == null)
             {

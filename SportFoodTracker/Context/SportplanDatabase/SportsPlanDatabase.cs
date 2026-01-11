@@ -15,27 +15,27 @@ namespace SportFoodTracker.Context.Sportplan
             if (_database != null)
                 return;
             _database = new SQLiteAsyncConnection(SportsPlanDbConstans.DatabasePath, SportsPlanDbConstans.Flags);
-            await _database.CreateTableAsync<ExerciseModel>();
-            await _database.CreateTableAsync<TrainingsplanModel>();
-            await _database.CreateTableAsync<WorkoutModel>();
+            await _database.CreateTableAsync<ExerciseEntryModel>();
+            await _database.CreateTableAsync<WorkoutSessionModel>();
+            await _database.CreateTableAsync<TrainingProgramModel>();
         }
         #region --- Get Lists ---
         /// <summary>
         /// Get all sportplans
         /// </summary>
         /// <returns></returns>
-        public async Task<List<WorkoutModel>> GetAllSportsplansAsync()
+        public async Task<List<TrainingProgramModel>> GetAllSportsplansAsync()
         {
             await Init();
             if (_database == null)
             {
-                return new List<WorkoutModel>();
+                return new List<TrainingProgramModel>();
             }
-            var sportsplans = await _database.Table<WorkoutModel>().ToListAsync();
+            var sportsplans = await _database.Table<TrainingProgramModel>().ToListAsync();
 
-            var trainings = await _database.Table<TrainingsplanModel>().ToListAsync();
+            var trainings = await _database.Table<WorkoutSessionModel>().ToListAsync();
 
-            var exercises = await _database.Table<ExerciseModel>().ToListAsync();
+            var exercises = await _database.Table<ExerciseEntryModel>().ToListAsync();
 
                 foreach (var sp in sportsplans)
                 {
@@ -56,16 +56,16 @@ namespace SportFoodTracker.Context.Sportplan
         /// Get all training plans
         /// </summary>
         /// <returns></returns>
-        public async Task<List<TrainingsplanModel>> GetAllTrainingsplansAsync()
+        public async Task<List<WorkoutSessionModel>> GetAllTrainingsplansAsync()
         {
             await Init();
 
             if (_database == null)
             {
-                return new List<TrainingsplanModel>();
+                return new List<WorkoutSessionModel>();
             }
-            var trainings = await _database.Table<TrainingsplanModel>().ToListAsync();
-            var exercises = await _database.Table<ExerciseModel>().ToListAsync();
+            var trainings = await _database.Table<WorkoutSessionModel>().ToListAsync();
+            var exercises = await _database.Table<ExerciseEntryModel>().ToListAsync();
 
             foreach (var tp in trainings)
             {
@@ -79,14 +79,14 @@ namespace SportFoodTracker.Context.Sportplan
         /// get all exercises
         /// </summary>
         /// <returns></returns>
-        public async Task<List<ExerciseModel>> GetAllExercisesAsync()
+        public async Task<List<ExerciseEntryModel>> GetAllExercisesAsync()
         {
             await Init();
             if (_database == null)
             {
-                return new List<ExerciseModel>();
+                return new List<ExerciseEntryModel>();
             }
-            return await _database.Table<ExerciseModel>().ToListAsync();
+            return await _database.Table<ExerciseEntryModel>().ToListAsync();
         }
         #endregion
 
@@ -96,26 +96,26 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WorkoutModel> GetSportsplanByIdAsync(int id)
+        public async Task<TrainingProgramModel> GetSportsplanByIdAsync(int id)
         {
             await Init();
 
             if (_database == null)
             {
-                return new WorkoutModel();
+                return new TrainingProgramModel();
             }
 
-            var sportsplan = await _database.Table<WorkoutModel>()
+            var sportsplan = await _database.Table<TrainingProgramModel>()
                                              .Where(sp => sp.Id == id)
                                              .FirstOrDefaultAsync();
             if (sportsplan == null)
                 return null!;
 
-            var trainings = await _database.Table<TrainingsplanModel>()
+            var trainings = await _database.Table<WorkoutSessionModel>()
                                            .Where(tp => tp.SportsplanId == id)
                                            .ToListAsync();
 
-            var exercises = await _database.Table<ExerciseModel>()
+            var exercises = await _database.Table<ExerciseEntryModel>()
                                            .ToListAsync();
 
             foreach (var tp in trainings)
@@ -132,22 +132,22 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<TrainingsplanModel> GetTrainingsplanByIdAsync(int id)
+        public async Task<WorkoutSessionModel> GetTrainingsplanByIdAsync(int id)
         {
             await Init();
 
             if (_database == null)
             {
-                return new TrainingsplanModel();
+                return new WorkoutSessionModel();
             }
 
-            var tp = await _database.Table<TrainingsplanModel>()
+            var tp = await _database.Table<WorkoutSessionModel>()
                                     .Where(t => t.Id == id)
                                     .FirstOrDefaultAsync();
             if (tp == null)
                 return null!;
 
-            tp.Exercise = await _database.Table<ExerciseModel>()
+            tp.Exercise = await _database.Table<ExerciseEntryModel>()
                                          .Where(ex => ex.TrainingsplanId == tp.Id)
                                          .ToListAsync();
             return tp;
@@ -158,14 +158,14 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ExerciseModel> GetExerciseByIdAsync(int id)
+        public async Task<ExerciseEntryModel> GetExerciseByIdAsync(int id)
         {
             await Init();
             if (_database == null)
             {
-                return new ExerciseModel();
+                return new ExerciseEntryModel();
             }
-            return await _database.Table<ExerciseModel>().Where(ex => ex.Id == id).FirstOrDefaultAsync();
+            return await _database.Table<ExerciseEntryModel>().Where(ex => ex.Id == id).FirstOrDefaultAsync();
         }
         #endregion
 
@@ -175,7 +175,7 @@ namespace SportFoodTracker.Context.Sportplan
         /// </summary>
         /// <param name="sportplan"></param>
         /// <returns></returns>
-        public async Task<int> SaveSportplanAsync(WorkoutModel sportplan)
+        public async Task<int> SaveSportplanAsync(TrainingProgramModel sportplan)
         {
             await Init();
             if (_database == null)
@@ -230,7 +230,7 @@ namespace SportFoodTracker.Context.Sportplan
         /// <param name="sportsplan"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task DeleteSportplanAsync(WorkoutModel sportsplan)
+        public async Task DeleteSportplanAsync(TrainingProgramModel sportsplan)
         {
             if (sportsplan == null)
                 throw new ArgumentNullException(nameof(sportsplan));

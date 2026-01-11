@@ -56,7 +56,7 @@
             <!-- Header -->
             @foreach(var workout in sportsplan)
             {
-                var todayPlan = GetTrainingModel(workout.Trainingsplan);
+                var todayPlan = GetTrainingModel(workout.WorkoutSessions);
                 var isDone = todayPlan != null
                 && trainingDoneToday.TryGetValue(todayPlan.Id, out var done)
                 && done;
@@ -66,7 +66,7 @@
 
                     <button class="btn btn-sm @(isDone ? "btn-success" : "btn-outline-light")"
                             disabled="@isDone"
-                            @onclick="() => StartTraining(workout.Trainingsplan)">
+                            @onclick="() => StartTraining(workout.WorkoutSessions)">
                         @(isDone ? "✔ Training Done" : "Start")
                     </button>
                 </div>
@@ -81,7 +81,7 @@
                     }
                     else
                     {
-                        var training = GetTrainingModel(workout.Trainingsplan);
+                        var training = GetTrainingModel(workout.WorkoutSessions);
                         <div class="px-3 pt-3">
                             <h4 class="fw-bold mb-1">@workout.Description</h4>
                             <small class="text-muted">Heutiges Training</small>
@@ -126,7 +126,7 @@
 </div>
 
 @code {
-    public List<WorkoutModel>? sportsplan;
+    public List<TrainingProgramModel>? sportsplan;
     public TrainingModel? trainingModel;
     private Dictionary<int, bool> trainingDoneToday = new();
 
@@ -143,7 +143,7 @@
 
         foreach (var workout in sportsplan)
         {
-            var todayPlan = GetTrainingModel(workout.Trainingsplan);
+            var todayPlan = GetTrainingModel(workout.WorkoutSessions);
 
             if (todayPlan != null)
             {
@@ -161,7 +161,7 @@
         NavigationManager.NavigateTo("/sportsplan-overview");
     }
 
-    public TrainingsplanModel GetTrainingModel(List<TrainingsplanModel> trainingsplanModels)
+    public WorkoutSessionModel GetTrainingModel(List<WorkoutSessionModel> trainingsplanModels)
     {
         return trainingsplanModels.FirstOrDefault(tp => tp.DayOfWeek.ToString() == DateTime.Now.DayOfWeek.ToString())!;
     }
@@ -169,7 +169,7 @@
     /// <summary>
     /// Navigate and start training
     /// </summary>
-    public void StartTraining(List<TrainingsplanModel> trainingsplanModels)
+    public void StartTraining(List<WorkoutSessionModel> trainingsplanModels)
     {
         var todayPlan = GetTrainingModel(trainingsplanModels);
 

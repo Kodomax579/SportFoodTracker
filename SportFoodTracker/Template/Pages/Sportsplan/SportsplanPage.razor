@@ -46,8 +46,8 @@ else
                     @{
                         // Logik-Mapping für die Anzeige
                         var daysToDisplay = id.HasValue
-                        ? sportsplan.Trainingsplan.Select(t => (t.DayOfWeek, t))!
-                        : Enum.GetValues<Weekday>().Select(d => (d, (TrainingsplanModel)null!));
+                        ? sportsplan.WorkoutSessions.Select(t => (t.DayOfWeek, t))!
+                        : Enum.GetValues<Weekday>().Select(d => (d, (WorkoutSessionModel)null!));
                     }
 
                     @foreach (var (day, training) in daysToDisplay)
@@ -161,7 +161,7 @@ else
     public int? id{ get; set; }
     private Weekday? activeDay;
     public TimeOnly pause;
-    public WorkoutModel? sportsplan;
+    public TrainingProgramModel? sportsplan;
     public Dictionary<Weekday,int> IndexForEveryWeekday = new Dictionary<Weekday, int>()
     {
         {Weekday.Monday, 0},
@@ -183,8 +183,8 @@ else
 
 
 
-    public Dictionary<Weekday, List<ExerciseModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
-    .ToDictionary(day => day, day => new List<ExerciseModel>());
+    public Dictionary<Weekday, List<ExerciseEntryModel>> ExercisesPerDay = Enum.GetValues<Weekday>()
+    .ToDictionary(day => day, day => new List<ExerciseEntryModel>());
     /// <summary>
     /// Initializes the component by loading the sports plan if an ID is provided.
     /// </summary>
@@ -199,7 +199,7 @@ else
         }
         else
         {
-            sportsplan = new WorkoutModel();
+            sportsplan = new TrainingProgramModel();
         }
         isLoading = false;
     }
@@ -210,11 +210,11 @@ else
     /// <param name="weekday"></param>
     public void OnAddExercise(Weekday weekday)
     {
-        ExercisesPerDay[weekday].Add(new ExerciseModel() { InternalId = IndexForEveryWeekday[weekday] });
+        ExercisesPerDay[weekday].Add(new ExerciseEntryModel() { InternalId = IndexForEveryWeekday[weekday] });
         IndexForEveryWeekday[weekday]++;
     }
 
-    public void OnSaveExercise(ExerciseModel exerciseModel, Weekday day)
+    public void OnSaveExercise(ExerciseEntryModel exerciseModel, Weekday day)
     {
         ExercisesPerDay[day][exerciseModel.InternalId] = exerciseModel;
     }
@@ -255,18 +255,18 @@ else
         if (sportsplan == null)
             return;
 
-        sportsplan.Trainingsplan = new List<TrainingsplanModel>();
+        sportsplan.WorkoutSessions = new List<WorkoutSessionModel>();
 
         var pauseTime = TimeOnly.FromTimeSpan(Duration);
 
         foreach (Weekday day in Enum.GetValues<Weekday>())
         {
-            sportsplan.Trainingsplan.Add(new TrainingsplanModel
+            sportsplan.WorkoutSessions.Add(new WorkoutSessionModel
             {
                 pause = pauseTime,
                 DayOfWeek = day,
                 Exercise = ExercisesPerDay[day]
-                    .Select(e => new ExerciseModel
+                    .Select(e => new ExerciseEntryModel
                     {
                         Description = e.Description,
                         Repetition = e.Repetition,
@@ -292,7 +292,7 @@ else
         {
             return;
         }
-        foreach (var training in sportsplan.Trainingsplan)
+        foreach (var training in sportsplan.WorkoutSessions)
         {
             if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
                 continue;
@@ -318,7 +318,7 @@ else
     /// </summary>
     /// <param name="day"></param>
     /// <param name="exercise"></param>
-    private void OnRemoveExercise(Weekday day, ExerciseModel exercise)
+    private void OnRemoveExercise(Weekday day, ExerciseEntryModel exercise)
     {
         if (ExercisesPerDay.ContainsKey(day))
         {
@@ -330,7 +330,7 @@ else
     /// <summary>
     /// Set IsCreated to false to open the trainingInputDetailComponent
     /// </summary>
-    public void OnEditTrainingDetail(ExerciseModel exercise)
+    public void OnEditTrainingDetail(ExerciseEntryModel exercise)
     {
         exercise.IsCreated = false;
     }
@@ -349,12 +349,12 @@ else
             ExercisesPerDay[day].Clear();
         }
 
-        if(sportsplan.Trainingsplan == null)
+        if(sportsplan.WorkoutSessions == null)
         {
             return;
         }
 
-        foreach (var training in sportsplan.Trainingsplan)
+        foreach (var training in sportsplan.WorkoutSessions)
         {
             if (!ExercisesPerDay.ContainsKey(training.DayOfWeek))
                 continue;
@@ -365,13 +365,13 @@ else
             IndexForEveryWeekday[training.DayOfWeek] = training.Exercise.Count;
 
             ExercisesPerDay[training.DayOfWeek] = training.Exercise
-                .Select(e => new ExerciseModel
+                .Select(e => new ExerciseEntryModel
                 {
                     Id = e.Id,
                     Description = e.Description,
                     Repetition = e.Repetition,
                     Sets = e.Sets,
-                    TrainingsplanId = e.TrainingsplanId,
+                    WorkoutSessionId = e.WorkoutSessionId,
                     IsCreated = e.IsCreated,
                     trainingParameter = e.trainingParameter,
                     Time = e.Time,

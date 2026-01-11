@@ -47,7 +47,7 @@
 @code {
     [Parameter]
     public int Id { get; set; }
-    public TrainingsplanModel? trainingPlan;
+    public WorkoutSessionModel? trainingPlan;
     public TrainingModel training = new();
     public DateTime startTraining;
     public DateTime endTraining;
@@ -63,7 +63,7 @@
         startTraining = DateTime.Now;
     }
 
-    public ExerciseModel? GetNextExerciseFromIndex()
+    public ExerciseEntryModel? GetNextExerciseFromIndex()
     {
         if (trainingPlan == null || Index >= trainingPlan.Exercise.Count)
         {
